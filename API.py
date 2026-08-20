@@ -52,12 +52,13 @@ def get_job_times(base_command,count):
     print(result)
     #Parse array
     diff = datetime.timedelta(seconds=0)
-    queue = datetime.timedelta(seconds=0)
+    queue = datetime.timedelta(hours=0,minutes=0,seconds=0)
     for i in range(3,len(result),3):
         start = datetime.datetime.strptime(result[i], '%Y-%m-%dT%H:%M:%S')
         end = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
         diff += (end-start)
         local_queue = result[i+2]
+        print(local_queue)
         (h, m, s) = local_queue.split(':')
         d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
         queue += datetime.timedelta(d)
