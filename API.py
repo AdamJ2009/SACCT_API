@@ -41,15 +41,22 @@ def get_count_jobs(base_command):
     test = subprocess.run(command, capture_output=True ,shell = True).stdout
     return clean_bytes(test)
 
-def get_job_times(base_command):
+def get_job_times(base_command,count):
     command = base_command + " -P -o Start,End,Planned"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     print(result)
+    #Turn into array
     result = result.replace("\n","|")
     result = result.split("|")
     print(result)
-    return 1,1
+    #Parse array
+    diff = 0
+    queue = 0
+    for i in range(3,len(result),3):
+        diff += (datetime.datetime(result[i+1])-datetime.datetime(result[i]))
+        queue += datetime.time(result[i+2])
+    return diff/count,queue/count
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -67,13 +74,15 @@ def get_user_metrics(name: str):
         base_command = "sacct -X " + user + start + end
         submit_time = get_time_submit(base_command)
         count = get_count_jobs(base_command)
-        average_time,average_queue = get_job_times(base_command)
+        average_time,average_queue = get_job_times(base_command,count)
         data = { "user":name,
                 "last":{
                     "access":access_str,
                     "submit":submit_time
                 },
                 "jobs":{
+                    "average_time":average_time,
+                    "average_queue":average_queue,
                     "count":count
                 }
         }
