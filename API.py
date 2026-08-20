@@ -29,41 +29,52 @@ def not_a_user_json():
     response.status_code = 400
     return response
     
-@app.route('/user/<string:name>') 
+@app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
-    last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
-    if last_access == "not a user": 
-        return not_a_user_json()
+    if request.method == 'GET':
+        last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
+        if last_access == "not a user": 
+            return not_a_user_json()
+        else:
+            last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
+            access_str = str(last_access.strftime('%Y-%m-%d'))
+            print(last_access)
+        user = "-u " + name + " "
+        end =  "-E " + access_str 
+        start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
+        base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
+        print(base_command)
+        test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
+        test = clean_bytes(test)
+        print(test)
+        test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
+        test = str(test.strftime('%Y-%m-%d'))
+        data = { "user":name,
+                "last":{
+                    "access":access_str,
+                    "submit":test
+                }
+        }
+        response = jsonify(data)
+        response.status_code = 200
+        return response
     else:
-        last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
-        access_str = str(last_access.strftime('%Y-%m-%d'))
-        print(last_access)
-    user = "-u " + name + " "
-    end =  "-E " + access_str 
-    start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
-    base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
-    print(base_command)
-    test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
-    test = clean_bytes(test)
-    print(test)
-    test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
-    test = str(test.strftime('%Y-%m-%d'))
-    data = { "user":name,
-             "last":{
-                 "access":access_str,
-                 "submit":test
-             }
-    }
-    response = jsonify(data)
-    response.status_code = 200
-    return response
-
-@app.route('/')
+        data = {"Error":"Method not allowed","Reason":"Not using get method"}
+        response = jsonify(data)
+        response.status_code = 405
+        return response
+    
+@app.route('/',methods=['GET'])
 def not_a_website():
-    data = {"Error":"Bad Request","Reason":"No user"}
-    response = jsonify(data)
-    response.status_code = 400
-    return response
+    if request.method == 'GET':
+        data = {"Error":"Bad Request","Reason":"No user"}
+        response = jsonify(data)
+        response.status_code = 400
+        return response
+    else:
+        response = "This is an API, not a website"
+        response.status_code = 405
+        return response
 
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
