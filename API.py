@@ -3,15 +3,21 @@ import subprocess
 import datetime
 
 app = Flask(__name__)
+
+def get_last_user_access_time(user):
+    command = "last " + user + " | head -n 1"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    return result
     
 @app.route('/user/<string:name>') 
 def get_user_metrics(name: str):
+    print(get_last_user_access_time)
     user = "-u " + name + " "
     end = "-E " + str(datetime.date.today().strftime('%Y-%m-%d')) + " "
     start  = "-S " + str((datetime.date.today() - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " "
     base_command = "sacct -X " + user + start + end
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
-    response = jsonify(test)
+    response = jsonify(str(test))
     response.status_code = 200
     return response
 
