@@ -28,6 +28,18 @@ def not_a_user_json():
     response = jsonify(data)
     response.status_code = 400
     return response
+
+def get_time_submit(base_command):
+    command = base_command + " -o Submit | tail -n 1"
+    test = subprocess.run(command, capture_output=True ,shell = True).stdout
+    test = clean_bytes(test)
+    test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
+    return str(test.strftime('%Y-%m-%d'))
+
+def get_count_jobs(base_command):
+    command = base_command + "| wc -l"
+    test = subprocess.run(command, capture_output=True ,shell = True).stdout
+    return clean_bytes(test)
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -42,17 +54,16 @@ def get_user_metrics(name: str):
         user = "-u " + name + " "
         end =  "-E " + access_str 
         start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
-        base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
-        print(base_command)
-        test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
-        test = clean_bytes(test)
-        print(test)
-        test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
-        test = str(test.strftime('%Y-%m-%d'))
+        base_command = "sacct -X " + user + start + end
+        submit_time = get_time_submit(base_command)
+        count = get_count_jobs(base_command)
         data = { "user":name,
                 "last":{
                     "access":access_str,
-                    "submit":test
+                    "submit":submit_time
+                },
+                "jobs":{
+                    "count":count
                 }
         }
         response = jsonify(data)
