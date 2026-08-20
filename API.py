@@ -119,6 +119,7 @@ def diskquota(user):
         result = result.split('\n')
         result = result[2]
         result = [' '.join(string.split()) for string in result]
+        print(result)
         result = result.split(" ")
         print(result)
     except:
