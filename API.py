@@ -10,7 +10,8 @@ def get_last_user_access_time(user):
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     #Regex fix to remove still logged in and reutrn the current time
     print(result)
-    result = re.sub(r"\s+still logged in\s+\\n'$","testing",str(result))
+    now = str(datetime.date.today().strftime('%H:%M'))
+    result = re.sub(r"\s+still logged in\s+\\n'$",f" - {now}",str(result))
     result = str(result).split()
     return result
     
