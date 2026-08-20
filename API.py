@@ -46,7 +46,7 @@ def get_user_metrics(name: str):
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
     test = clean_bytes(test)
     print(test)
-    test = datetime.datetime.strptime(test, '%Y,-%m-%dT%H:%M:%S')
+    test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
     test = str(test.strftime('%Y-%m-%d'))
     data = { "user":name,
              "last":{
