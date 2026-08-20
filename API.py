@@ -32,7 +32,7 @@ def get_user_metrics(name: str):
         last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
         print(last_access)
     user = "-u " + name + " "
-    end =  "-E " + str(last_access)
+    end =  "-E " + str(last_access.strftime('%Y-%m-%d'))
     start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end
     print(base_command)
