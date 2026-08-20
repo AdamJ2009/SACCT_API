@@ -97,6 +97,20 @@ def get_shape(base_command,count):
             nodelist[result[i+3]] += 1
     return node/count,cpu/count,0,nodelist
 
+def get_partition_list(base_command):
+    command = base_command + " -P -o Partition"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
+    result = result.replace("\n","|")
+    result = result.split("|")
+    partitions = {}
+    for i in range(1,len(result)):
+        if result[i] not in partitions:
+            partitions[result[i]] = 1
+        else:
+            partitions[result[i]] += 1
+    return partitions
+
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -119,6 +133,7 @@ def get_user_metrics(name: str):
         count = int(count) - 2 #Table header needs to go as well
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
+        partitions = get_partition_list(base_command)
         data = { "user":name,
                 "last":{
                     "access":access_str,
@@ -135,7 +150,8 @@ def get_user_metrics(name: str):
                     "avg_cpu":cpu,
                     "avg_tasks":tasks,
                     "nodelist":nodelist
-                }
+                },
+                "partitions":partitons
         }
         response = jsonify(data)
         response.status_code = 200
