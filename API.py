@@ -11,7 +11,7 @@ def get_last_user_access_time(user):
     
 @app.route('/user/<string:name>') 
 def get_user_metrics(name: str):
-    print(get_last_user_access_time)
+    print(get_last_user_access_time(name))
     user = "-u " + name + " "
     end = "-E " + str(datetime.date.today().strftime('%Y-%m-%d')) + " "
     start  = "-S " + str((datetime.date.today() - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " "
