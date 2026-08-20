@@ -6,7 +6,7 @@ import re
 app = Flask(__name__)
 
 def clean_bytes(data):
-    return data.decode('utf-8').strip()
+    return data.encode('utf-8').strip()
 
 def get_last_user_access_time(user):
     command = "last " + user + " -F | head -n 1"
