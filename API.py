@@ -40,6 +40,8 @@ def get_user_metrics(name: str):
     print(base_command)
     test = str(subprocess.run(base_command, capture_output=True ,shell = True).stdout)
     print(test)
+    test = datetime.datetime.strptime(test, '%Y,-%b-%d')
+    test = str(test.strftime('%Y-%m-%d'))
     data = { "user":name,
              "last":{
                  "access":access_str,
