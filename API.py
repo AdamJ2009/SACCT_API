@@ -15,7 +15,7 @@ def get_last_user_access_time(user):
     result = str(result).split()
     if len(result) == 1:
         return "not a user"
-    result = str(result[13] + "-" +  result[10] + "-" +result[11] + " " +result[12])
+    result = str(result[13] + "-" +  result[10] + "-" +result[11])
     return result
 
 def not_a_user_json():
@@ -29,10 +29,10 @@ def get_user_metrics(name: str):
     if last_access == "not a user": 
         return not_a_user_json()
     else:
-        last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d %H:%M:%S')
+        last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
     user = "-u " + name + " "
     end =  "-E " + str(last_access)
-    start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d %H:%M:%S')) + " " #90 days forced limit
+    start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end
     print(base_command)
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
