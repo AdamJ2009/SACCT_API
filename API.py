@@ -95,7 +95,7 @@ def get_shape(base_command,count):
             nodelist[result[i+3]] = 1
         else:
             nodelist[result[i+3]] += 1
-    return node/count,cpu/count,0,0
+    return node/count,cpu/count,0,nodelist
 
     
 @app.route('/user/<string:name>',methods=['GET'])
