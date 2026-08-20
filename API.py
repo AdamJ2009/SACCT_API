@@ -41,7 +41,7 @@ def get_count_jobs(base_command):
     test = subprocess.run(command, capture_output=True ,shell = True).stdout
     return clean_bytes(test)
 
-def get_job_times(base_command,count):
+def get_job_times(base_command,count : int):
     command = base_command + " -P -o Start,End,Planned"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
