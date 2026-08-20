@@ -7,7 +7,7 @@ app = Flask(__name__)
 def get_last_user_access_time(user):
     command = "last " + user + " | head -n 1"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = result.split(" ")
+    result = str(result).split()
     return result
     
 @app.route('/user/<string:name>') 
