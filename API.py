@@ -15,7 +15,7 @@ def get_last_user_access_time(user):
     #Regex fix to remove still logged in and reutrn the current time
     print(result)
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
-    result = re.sub(r"\s+still logged in\s+$",f" - {now}, ",str(result))
+    result = re.sub(r"\s+still logged in\s*$",f" - {now}, ",str(result))
     result = str(result).split()
     print(result)
     if len(result) == 1:
