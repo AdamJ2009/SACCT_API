@@ -121,10 +121,9 @@ def diskquota(user):
         print(result)
         result = result[2]
         result = result.split(" ")
-        print(result)
+        return result[1:6]
     except:
-        print("forbidden")
-        raise
+        return [None] * 6
 
     
 @app.route('/user/<string:name>',methods=['GET'])
@@ -149,7 +148,7 @@ def get_user_metrics(name: str):
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
-        diskquota(name)
+        quota = diskquota(name)
         data = { "user":name,
                 "last":{
                     "access":access_str,
@@ -167,7 +166,19 @@ def get_user_metrics(name: str):
                     "avg_tasks":tasks,
                     "nodelist":nodelist
                 },
-                "partitions":partitions
+                "partitions":partitions,
+                "quotas":{
+                    "blocks":{
+                        "Used(bytes)":quota[0],
+                        "Quota(bytes)":quota[1],
+                        "Limit(bytes)":quota[2],
+                    },
+                    "files":{
+                        "Used":quota[3],
+                        "Quota":quota[4],
+                        "Limit":quota[5],
+                    }
+                }
         }
         response = jsonify(data)
         response.status_code = 200
