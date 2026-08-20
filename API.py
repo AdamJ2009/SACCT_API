@@ -111,7 +111,7 @@ def get_user_metrics(name: str):
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str)
         count = get_count_jobs(base_command)
-        count = int(count)
+        count = int(count) - 2 #Table header needs to go as well
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         data = { "user":name,
