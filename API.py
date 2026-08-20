@@ -59,7 +59,6 @@ def get_job_times(base_command,count: int):
         end = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
         diff += (end-start)
         local_queue = result[i+2]
-        print(local_queue)
         (h, m, s) = local_queue.split(':')
         d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
         queue += d
@@ -88,8 +87,8 @@ def get_user_metrics(name: str):
                     "submit":submit_time
                 },
                 "jobs":{
-                    "average_time":average_time,
-                    "average_queue":average_queue,
+                    "average_time":str(average_time),
+                    "average_queue":str(average_queue),
                     "count":count
                 }
         }
