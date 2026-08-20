@@ -61,7 +61,7 @@ def get_job_times(base_command,count):
         print(local_queue)
         (h, m, s) = local_queue.split(':')
         d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
-        queue += datetime.timedelta(d)
+        queue += d
     return diff/count,queue/count
     
 @app.route('/user/<string:name>',methods=['GET'])
