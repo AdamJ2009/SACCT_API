@@ -118,7 +118,7 @@ def diskquota(user):
         result = clean_bytes(result)
         result = result.split('\n')
         result = result[2]
-        c = [' '.join(string.split()) for string in result]
+        result = [' '.join(string.split()) for string in result]
         result = result.split(" ")
         print(result)
     except:
