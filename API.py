@@ -51,7 +51,7 @@ def get_job_times(base_command,count):
     result = result.split("|")
     print(result)
     #Parse array
-    diff = 0
+    diff = datetime.timedelta(seconds=0)
     queue = 0
     for i in range(3,len(result),3):
         start = datetime.datetime.strptime(result[i], '%Y-%m-%dT%H:%M:%S')
