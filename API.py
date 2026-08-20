@@ -118,7 +118,7 @@ def diskquota(user):
         result = clean_bytes(result)
         result = result.split('\n')
         result = result[1]
-        result = result.split[" "]
+        result = result.split(" ")
         print(result)
     except:
         print("forbidden")
