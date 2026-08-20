@@ -54,8 +54,8 @@ def get_job_times(base_command,count):
     diff = 0
     queue = 0
     for i in range(3,len(result),3):
-        start = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
-        end = datetime.datetime.strptime(result[i+2], '%Y-%m-%dT%H:%M:%S')
+        start = datetime.datetime.strptime(result[i], '%Y-%m-%dT%H:%M:%S')
+        end = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
         diff += (end-start)
         queue += datetime.time(result[i+2])
     return diff/count,queue/count
