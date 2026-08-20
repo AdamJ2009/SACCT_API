@@ -29,7 +29,8 @@ def get_user_metrics(name: str):
     if last_access == "not a user": 
         return not_a_user_json()
     else:
-        last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d').strftime('%Y-%m-%d')
+        last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
+        print(last_access)
     user = "-u " + name + " "
     end =  "-E " + str(last_access)
     start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
