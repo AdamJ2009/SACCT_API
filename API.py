@@ -117,7 +117,8 @@ def diskquota(user):
         result = subprocess.run(command, capture_output=True ,shell = True).stdout
         result = clean_bytes(result)
         result = result.split('\n')
-        result = result[1]
+        result = result[2]
+        c = [' '.join(string.split()) for string in result]
         result = result.split(" ")
         print(result)
     except:
