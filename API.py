@@ -24,17 +24,32 @@ def get_last_user_access_time(user):
     return result
 
 def not_a_user_json():
-    data = {"Error":"Bad Request","Reason":"Not a user"}
+    data = {"Error":"Not Found","Reason":"Not a user"}
     response = jsonify(data)
-    response.status_code = 400
+    response.status_code = 404
     return response
 
+def no_data_json(name,access_str):
+    data = { "user":name,
+                "last":{
+                    "access":access_str,
+                    "submit":"Not within 90 days"
+                }
+    }
+    response = jsonify(data)
+    response.status_code = 404
+    return response
+
+
 def get_time_submit(base_command):
-    command = base_command + " -o Submit | tail -n 1"
-    test = subprocess.run(command, capture_output=True ,shell = True).stdout
-    test = clean_bytes(test)
-    test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
-    return str(test.strftime('%Y-%m-%d'))
+    try:
+        command = base_command + " -o Submit | tail -n 1"
+        test = subprocess.run(command, capture_output=True ,shell = True).stdout
+        test = clean_bytes(test)
+        test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
+        return str(test.strftime('%Y-%m-%d'))
+    except:
+        return "Nothing in last 90 days"
 
 def get_count_jobs(base_command):
     command = base_command + "| wc -l"
@@ -61,6 +76,16 @@ def get_job_times(base_command,count: int):
         d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
         queue += d
     return diff/count,queue/count
+
+def get_shape(base_command):
+    command = base_command + " -P -o NNodes,NCPUS,Ntaks,Nodelist"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
+    result = result.replace("\n","|")
+    result = result.split("|")
+    print(result)
+    return 0,0,0,0
+
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -77,8 +102,11 @@ def get_user_metrics(name: str):
         start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
         base_command = "sacct -X " + user + start + end
         submit_time = get_time_submit(base_command)
+        if submit_time == "Nothing in last 90 days":
+            return no_data_json(name,access_str)
         count = get_count_jobs(base_command)
         average_time,average_queue = get_job_times(base_command,count)
+        node_count,cpu_count,tasks,tasklist = get_shape(base_command)
         data = { "user":name,
                 "last":{
                     "access":access_str,
