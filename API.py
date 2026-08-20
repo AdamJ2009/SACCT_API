@@ -15,7 +15,7 @@ def get_last_user_access_time(user):
     #Regex fix to remove still logged in and reutrn the current time
     print(result)
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
-    result = re.sub(r"\s+still logged in\s*$",f" - {now}, ",str(result))
+    result = re.sub(r"\s+still logged in\s*$",f" - {now}",str(result))
     result = str(result).split() 
     print(result)
     if len(result) == 1:
@@ -45,11 +45,9 @@ def get_job_times(base_command,count: int):
     command = base_command + " -P -o Start,End,Planned"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
-    print(result)
     #Turn into array
     result = result.replace("\n","|")
     result = result.split("|")
-    print(result)
     #Parse array
     diff = datetime.timedelta(seconds=0)
     queue = datetime.timedelta(hours=0,minutes=0,seconds=0)
@@ -71,7 +69,7 @@ def get_user_metrics(name: str):
         if last_access == "not a user": 
             return not_a_user_json()
         else:
-            last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
+            last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
             print(last_access)
         user = "-u " + name + " "
