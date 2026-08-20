@@ -79,6 +79,7 @@ def get_job_times(base_command,count: int):
 
 def get_shape(base_command):
     command = base_command + " -P -o NNodes,NCPUS,Ntaks,Nodelist"
+    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
