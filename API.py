@@ -9,10 +9,9 @@ def get_user_metrics(name: str):
     user = "-u " + name + " "
     end = "-E " + str(datetime.date.today().strftime('%Y-%m-%d')) + " "
     start  = "-S " + str((datetime.date.today() - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " "
-    test = subprocess.Popen(["ping","-W","2","-c", "1", "127.0.0.1"], stdout=subprocess.PIPE)
+    base_command = "sacct -X" + user + start + end
+    test = subprocess.Popen(base_command, stdout=subprocess.PIPE)
     output = test.communicate()[0]
-    output = "sacct " + user + start + end
-    print(output)
     response = jsonify(str(output))
     response.status_code = 200
     return response
