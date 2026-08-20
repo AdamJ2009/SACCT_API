@@ -86,10 +86,15 @@ def get_shape(base_command,count):
     print(result)
     node = 0
     cpu = 0
+    nodelist = {}
     for i in range(4,len(result),4):
         print(i//4)
         node += int(result[i])
         cpu += int(result[i+1])
+        if result[i+3] not in nodelist:
+            nodelist[result[i+3]] = 1
+        else:
+            nodelist[result[i+3]] += 1
     return node/count,cpu/count,0,0
 
     
@@ -149,7 +154,7 @@ def not_a_website():
         response.status_code = 400
         return response
     else:
-        response = "This is an API, not a website"
+        response = {"Error":"Method not allowed","Reason":"Not using get method"}
         response.status_code = 405
         return response
 
