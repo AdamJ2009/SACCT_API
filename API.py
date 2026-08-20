@@ -87,6 +87,7 @@ def get_shape(base_command,count):
     node = 0
     cpu = 0
     for i in range(4,len(result),4):
+        print(i%4)
         node += int(result[i])
         cpu += int(result[i+1])
     return node/count,cpu/count,0,0
