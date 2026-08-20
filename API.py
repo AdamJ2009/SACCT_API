@@ -13,6 +13,15 @@ def get_last_user_access_time(user):
     now = str(datetime.datetime.now().strftime('%H:%M'))
     result = re.sub(r"\s+still logged in\s+\\n'$",f" - {now}",str(result))
     result = str(result).split()
+    if len(result) == 11:
+        result.pop(-1)
+    elif len(result) == 9:
+        time = result[6].split(":")
+        entry = datetime.datetime(month=result[4],day=result[5],hour=time[0],minute=time[1])
+        exit = datetime.datetime.now().strftime('%m-%d %H:%M')
+        print(entry,exit)
+    else:
+        return "not a user"
     return result
     
 @app.route('/user/<string:name>') 
