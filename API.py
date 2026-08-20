@@ -111,6 +111,15 @@ def get_partition_list(base_command):
             partitions[result[i]] += 1
     return partitions
 
+def diskquota(user):
+    try:
+        command = "quota -w -u " + user  
+        result = subprocess.run(command, capture_output=True ,shell = True).stdout
+        result = clean_bytes(result)
+        print(result)
+    except:
+        print("forbidden")
+
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
