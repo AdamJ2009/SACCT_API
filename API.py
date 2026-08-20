@@ -116,6 +116,9 @@ def diskquota(user):
         command = "quota -w -u " + user  
         result = subprocess.run(command, capture_output=True ,shell = True).stdout
         result = clean_bytes(result)
+        result = result.split('\n')
+        result = result[1]
+        result = result.split[" "]
         print(result)
     except:
         print("forbidden")
