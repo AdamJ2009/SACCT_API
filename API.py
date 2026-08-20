@@ -40,6 +40,14 @@ def get_count_jobs(base_command):
     command = base_command + "| wc -l"
     test = subprocess.run(command, capture_output=True ,shell = True).stdout
     return clean_bytes(test)
+
+def get_job_times(base_command):
+    command = base_command + "-P -o Start,End,Planned"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
+    print(result)
+    0/0 #Intentional crash
+    return 1,1
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -57,6 +65,7 @@ def get_user_metrics(name: str):
         base_command = "sacct -X " + user + start + end
         submit_time = get_time_submit(base_command)
         count = get_count_jobs(base_command)
+        average_time,average_queue = get_job_times(base_command)
         data = { "user":name,
                 "last":{
                     "access":access_str,
