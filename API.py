@@ -5,13 +5,17 @@ import re
 
 app = Flask(__name__)
 
+def clean_bytes(data):
+    return data.decode('utf-8').strip()
+
 def get_last_user_access_time(user):
     command = "last " + user + " -F | head -n 1"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
     #Regex fix to remove still logged in and reutrn the current time
     print(result)
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
-    result = re.sub(r"\s+still logged in\s+\\n'$",f" - {now}, ",str(result))
+    result = re.sub(r"\s+still logged in\s+$",f" - {now}, ",str(result))
     result = str(result).split()
     if len(result) == 1:
         return "not a user"
@@ -39,6 +43,7 @@ def get_user_metrics(name: str):
     base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
     print(base_command)
     test = str(subprocess.run(base_command, capture_output=True ,shell = True).stdout)
+    test = clean_bytes(test)
     print(test)
     test = datetime.datetime.strptime(test, '%Y,-%b-%d')
     test = str(test.strftime('%Y-%m-%d'))
