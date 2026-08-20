@@ -77,15 +77,20 @@ def get_job_times(base_command,count: int):
         queue += d
     return diff/count,queue/count
 
-def get_shape(base_command):
-    command = base_command + " -P -o NNodes,NCPUS,Ntaks,Nodelist"
+def get_shape(base_command,count):
+    command = base_command + " -P -o NNodes,NCPUS,Ntasks,Nodelist"
     print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
     result = result.split("|")
     print(result)
-    return 0,0,0,0
+    node = 0
+    cpu = 0
+    for i in range(4,len(result),4):
+        node += int(result[i])
+        cpu += int(result[i+1])
+    return node/count,cpu/count,0,0
 
     
 @app.route('/user/<string:name>',methods=['GET'])
@@ -107,7 +112,7 @@ def get_user_metrics(name: str):
             return no_data_json(name,access_str)
         count = get_count_jobs(base_command)
         average_time,average_queue = get_job_times(base_command,count)
-        node_count,cpu_count,tasks,tasklist = get_shape(base_command)
+        node,cpu,tasks,nodelist = get_shape(base_command,count)
         data = { "user":name,
                 "last":{
                     "access":access_str,
@@ -117,6 +122,13 @@ def get_user_metrics(name: str):
                     "average_time":str(average_time),
                     "average_queue":str(average_queue),
                     "count":count
+                },
+                "shape":
+                {
+                    "avg_nodes":node,
+                    "avg_cpu":cpu,
+                    "avg_tasks":tasks,
+                    "nodelist":nodelist
                 }
         }
         response = jsonify(data)
