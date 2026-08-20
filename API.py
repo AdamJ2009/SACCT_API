@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, redirect, session,  json, jsonify
 import subprocess
 import datetime
+import re
 
 app = Flask(__name__)
 
 def get_last_user_access_time(user):
     command = "last " + user + " | head -n 1"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    #Regex fix to remove still logged in and reutrn the current time
+    result = re.sub(r":\d+\s+still logged in$","testing")
     result = str(result).split()
     return result
     
