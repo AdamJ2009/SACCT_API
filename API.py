@@ -123,6 +123,7 @@ def diskquota(user):
         print(result)
     except:
         print("forbidden")
+        raise
 
     
 @app.route('/user/<string:name>',methods=['GET'])
