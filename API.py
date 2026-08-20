@@ -10,17 +10,29 @@ def get_last_user_access_time(user):
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     #Regex fix to remove still logged in and reutrn the current time
     print(result)
-    now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %y'))
+    now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
     result = re.sub(r"\s+still logged in\s+\\n'$",f" - {now}, ",str(result))
     result = str(result).split()
+    if len(result) == 1:
+        return "not a user"
+    result = str(result[13] + "-" +  result[10] + "-" +result[11] + " " +result[12])
     return result
+
+def not_a_user_json():
+    response = jsonify("Bad Request:Not a user")
+    response.status_code = 400
+    return response
     
 @app.route('/user/<string:name>') 
 def get_user_metrics(name: str):
-    print(get_last_user_access_time(name))
+    last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
+    if last_access == "not a user": 
+        return not_a_user_json()
+    else:
+        last_access = datetime.datetime.strptime(last_access, '%Y-%b%-d %H:%M:%S')
     user = "-u " + name + " "
-    end = "-E " + str(datetime.date.today().strftime('%Y-%m-%d')) + " "
-    start  = "-S " + str((datetime.date.today() - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " "
+    end =  "-E " + str(last_access)
+    start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d %H:%M:%S')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
     response = jsonify(str(test))
