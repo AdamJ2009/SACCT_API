@@ -43,7 +43,7 @@ def get_user_metrics(name: str):
     start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
     print(base_command)
-    test = str(subprocess.run(base_command, capture_output=True ,shell = True).stdout)
+    test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
     test = clean_bytes(test)
     print(test)
     test = datetime.datetime.strptime(test, '%Y,-%b-%d')
