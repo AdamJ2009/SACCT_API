@@ -121,7 +121,8 @@ def diskquota(user):
         print(result)
         result = result[2]
         result = result.split(" ")
-        return result[1:6]
+        print(result[1:7])
+        return result[1:7]
     except:
         return [None] * 6
 
