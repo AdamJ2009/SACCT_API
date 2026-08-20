@@ -151,7 +151,7 @@ def get_user_metrics(name: str):
                     "avg_tasks":tasks,
                     "nodelist":nodelist
                 },
-                "partitions":partitons
+                "partitions":partitions
         }
         response = jsonify(data)
         response.status_code = 200
