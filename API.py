@@ -34,6 +34,7 @@ def get_user_metrics(name: str):
     end =  "-E " + str(last_access)
     start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d %H:%M:%S')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end
+    print(base_command)
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
     response = jsonify(str(test))
     response.status_code = 200
