@@ -43,12 +43,12 @@ def get_count_jobs(base_command):
 
 def get_job_times(base_command):
     command = base_command + " -P -o Start,End,Planned"
-    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    print(result)
     result = clean_bytes(result)
     print(result)
-    0/0 #Intentional crash
+    result = result.replace("\n","|")
+    result = result.split("|")
+    print(result)
     return 1,1
     
 @app.route('/user/<string:name>',methods=['GET'])
