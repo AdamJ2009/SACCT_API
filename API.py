@@ -18,7 +18,7 @@ def get_last_user_access_time(user):
     result = re.sub(r"\s+still logged in\s*$",f" - {now}",str(result))
     result = str(result).split() 
     print(result)
-    if len(result) > 14:
+    if len(result) < 14:
         return "not a user"
     result = str(result[13] + "-" +  result[10] + "-" +result[11])
     return result
