@@ -19,7 +19,8 @@ def get_last_user_access_time(user):
     return result
 
 def not_a_user_json():
-    response = jsonify("Bad Request:Not a user")
+    data = {"Error":"Bad Request","Reason":"Not a user"}
+    response = jsonify(data)
     response.status_code = 400
     return response
     
@@ -30,21 +31,28 @@ def get_user_metrics(name: str):
         return not_a_user_json()
     else:
         last_access = datetime.datetime.strptime(last_access, '%Y,-%b-%d')
+        access_str = str(last_access.strftime('%Y-%m-%d'))
         print(last_access)
     user = "-u " + name + " "
-    end =  "-E " + str(last_access.strftime('%Y-%m-%d'))
+    end =  "-E " + access_str 
     start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
-    base_command = "sacct -X " + user + start + end
+    base_command = "sacct -X " + user + start + end + " -o Submit | tail -n 1"
     print(base_command)
     test = subprocess.run(base_command, capture_output=True ,shell = True).stdout
-    response = jsonify(str(test))
+    data = { "user":name,
+             "last":{
+                 "access": access_str,
+                 "submit":test
+             }
+    }
+    response = jsonify(data)
     response.status_code = 200
     return response
 
 @app.route('/')
 def not_a_website():
-    output = '400 Bad Request:This is an API, not a website'
-    response = jsonify(str(output))
+    data = {"Error":"Bad Request","Reason":"No user"}
+    response = jsonify(data)
     response.status_code = 400
     return response
 
