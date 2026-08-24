@@ -259,8 +259,8 @@ def get_user_metrics(name: str):
         count = get_count_jobs(base_command)
         count = int(count) - 2 #Table header needs to go as well
         average_time,average_queue = get_job_times(base_command,count)
-        node,cpu,tasks,nodelist,shapelist,single,multi,node = get_shape(base_command,count)
-        shape = format_shapes(single,multi,node)
+        node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command,count)
+        shape = format_shapes(single,multi,node_shape)
         partitions = get_partition_list(base_command)
         try:
             cpueff = float(get_cpueff(base_command,count)[0]) * 100
