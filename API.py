@@ -125,6 +125,7 @@ def convert_mb(value):
 
 def get_metrics(base_command,count):
     command = base_command + " -P -o TotalCPU,Elasped,AllocCPUS,MaxRSS,Reqmem"
+    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
