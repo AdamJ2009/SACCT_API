@@ -111,6 +111,14 @@ def get_partition_list(base_command):
             partitions[result[i]] += 1
     return partitions
 
+def get_metrics(base_command):
+    command = base_command + " -P -o TotalCPU,Elasped,AllocCPUS,MaxRSS,Reqmem"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
+    result = result.replace("\n","|")
+    result = result.split("|")
+    print(result)
+
 def diskquota(user):
     try:
         command = "quota -w -u " + user  
@@ -126,6 +134,9 @@ def diskquota(user):
     except:
         return [None] * 6
 
+def job_effecicency(base_command):
+    command = base_command + " -P -o "
+    return None
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -149,6 +160,7 @@ def get_user_metrics(name: str):
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
+        get_metrics(base_command)
         quota = diskquota(name)
         data = { "user":name,
                 "last":{
