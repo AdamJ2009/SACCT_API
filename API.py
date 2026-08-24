@@ -127,7 +127,6 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    print(value)
     if re.search("^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
@@ -139,7 +138,8 @@ def time_converter(value):
         ms = 0
         time = datetime.datetime.strptime(value[1], '%H:%M:%S')
     #m:s.ms
-    elif re.search("^\d+:\d+:\d+$",value):
+    elif re.search("^\d+:\d+.\d+$",value):
+        print(value)
         value = value.split(".")
         days = 0
         ms = int(value[1])
