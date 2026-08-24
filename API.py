@@ -132,15 +132,17 @@ def time_converter(value):
     return int(delta.total_seconds())
 
 def get_cpueff(base_command,count):
+    base_command = base_command.replace("-X","") #Needed to fix to give totalCPU where possible
     command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS"
     print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
+    result = result.replace("|","") #To remove wrong lines
     result = result.replace("\n","|")
     result = result.split("|")
     print(result)
     cpueffsum = 0
-    for i in range(3,len(result),3):
+    for i in range(1,len(result),3):
         try:
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
             print(cpueffsum)
