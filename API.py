@@ -140,7 +140,7 @@ def get_cpueff(base_command,count):
     result = result.split("|")
     print(result)
     cpueffsum = 0
-    for i in range(5,len(result),5):
+    for i in range(3,len(result),3):
         try:
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
         except: 
@@ -157,7 +157,7 @@ def get_memeff(base_command,count):
     result = result.split("|")
     memeff = 0
     print(result)
-    for i in range(1,len(result)):
+    for i in range(1,len(result),2):
         try:
             memeff += convert_mb(result[i+1]) / convert_mb(result[i])
         except: 
