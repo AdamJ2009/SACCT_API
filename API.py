@@ -101,6 +101,7 @@ def get_shape(base_command,count):
         text_shape = str(result[i])+str(result[i+1])+(str(result[i+3]))
         if text_shape not in shape_ver:
             shape_ver[text_shape] = shapes
+            shapelist[shapes] = shapes
             shapelist[shapes]["count"] = 1
             shapelist[shapes]["nodes"] = int(result[i])
             shapelist[shapes]["cpu"] = int(result[i+1])
