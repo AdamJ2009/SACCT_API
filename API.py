@@ -174,7 +174,7 @@ def get_user_metrics(name: str):
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
-        get_metrics(base_command)
+        cpueff, memeff = get_metrics(base_command,count)
         quota = diskquota(name)
         data = { "user":name,
                 "last":{
