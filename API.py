@@ -112,11 +112,11 @@ def get_partition_list(base_command):
     return partitions
 
 def convert_mb(value):
+    print(value)
     if len(value) == 0:
         return 0
     letter = value[-1]
     value = int(value[0:len(value)-1])
-    print(value)
     if letter == "G":
         return value * 1024
     elif letter == "M":
@@ -142,8 +142,13 @@ def get_metrics(base_command,count):
     cpueffsum = 0
     memeffsum = 0
     for i in range(5,len(result),5):
-        cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
-        memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
+        try:
+            lcpu,lmem = cpueffsum,memeffsum
+            cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
+            memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
+        except: #Zero division, drop metric
+            cpueffsum,memeffsum = lcpu,lmem
+            count -= 1
     return cpueffsum/count,memeffsum/count
 
 def diskquota(user):
