@@ -111,13 +111,31 @@ def get_partition_list(base_command):
             partitions[result[i]] += 1
     return partitions
 
-def get_metrics(base_command):
+def convert_mb(value):
+    letter = value[-1]
+    value = int(value[0:len(value)])
+    if letter == "G":
+        return value * 1024
+    elif letter == "M":
+        return value
+    elif letter == "K":
+        return value / 1024
+    else:
+        return value / (1024*1024)
+
+def get_metrics(base_command,count):
     command = base_command + " -P -o TotalCPU,Elasped,AllocCPUS,MaxRSS,Reqmem"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
     result = result.split("|")
     print(result)
+    cpueffsum = datetime.timedelta(hours=0,minutes=0,seconds=0)
+    memeffsum = 0
+    for i in range(5,len(result),5):
+        cpueffsum += (datetime.datetime.strptime(result[i], '%H:%M:%S') / (datetime.datetime.strptime(result[i+1], '%H:%M:%S') / int(result[2])))
+        memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
+    return cpueffsum/count,memeffsum/count
 
 def diskquota(user):
     try:
@@ -133,10 +151,6 @@ def diskquota(user):
         return result[1:7]
     except:
         return [None] * 6
-
-def job_effecicency(base_command):
-    command = base_command + " -P -o "
-    return None
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
