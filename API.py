@@ -13,11 +13,9 @@ def get_last_user_access_time(user):
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     #Regex fix to remove still logged in and reutrn the current time
-    print(result)
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
     result = re.sub(r"\s+still logged in\s*$",f" - {now}",str(result))
     result = str(result).split() 
-    print(result)
     if len(result) < 14:
         return "not a user"
     result = str(result[13] + "-" +  result[10] + "-" +result[11])
@@ -83,7 +81,6 @@ def get_shape(base_command,count):
     result = clean_bytes(result)
     result = result.replace("\n","|")
     result = result.split("|")
-    print(result)
     node = 0
     cpu = 0
     nodelist = {}
@@ -91,7 +88,6 @@ def get_shape(base_command,count):
     shapelist = {}
     shapes = 0
     for i in range(4,len(result),4):
-        print(i//4)
         node += int(result[i])
         cpu += int(result[i+1])
         if result[i+3] not in nodelist:
@@ -127,7 +123,6 @@ def get_partition_list(base_command):
     return partitions
 
 def convert_mb(value):
-    print(value)
     if len(value) == 0:
         return 0
     letter = value[-1]
@@ -142,7 +137,6 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    print(value)
     if re.search("^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
@@ -160,14 +154,11 @@ def time_converter(value):
         ms = int(value[1])
         time = datetime.datetime.strptime(value[0], '%M:%S')
     delta = datetime.timedelta(days=days,hours=time.hour,minutes=time.minute,seconds=time.second)
-    print(int(delta.total_seconds()*1000 + ms))
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
     base_command = base_command.replace("-X","") #Needed to fix to give totalCPU where possible
     command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS"
-    print(command)
-    print(count)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
@@ -178,8 +169,6 @@ def get_cpueff(base_command,count):
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
         except: 
             count -= 1
-    print(cpueffsum)
-    print(count)
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
@@ -191,11 +180,9 @@ def get_memeff(base_command,count):
     result = result.replace("\n","|")
     result = result.split("|")
     memeff = 0
-    print(result)
     for i in range(1,len(result),2):
         try:
             memeff += convert_mb(result[i+1]) / convert_mb(result[i])
-            print(memeff)
         except: 
             count -= 1
     return memeff/count, #Will only fail if all metrics fail
@@ -207,10 +194,8 @@ def diskquota(user):
         result = clean_bytes(result)
         result = result.split('\n')
         result = [' '.join(string.split()) for string in result]
-        print(result)
         result = result[2]
         result = result.split(" ")
-        print(result[1:7])
         return result[1:7]
     except:
         return [None] * 6
@@ -224,7 +209,6 @@ def get_user_metrics(name: str):
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
-            print(last_access)
         user = "-u " + name + " "
         end =  "-E " + access_str 
         start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
@@ -246,9 +230,6 @@ def get_user_metrics(name: str):
         except:
             memeff = "Missing"
         quota = diskquota(name)
-        print("")
-        print(cpueff,memeff)
-        print("")
         data = { "user":name,
                 "last":{
                     "access":access_str,
