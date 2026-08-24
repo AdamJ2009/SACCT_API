@@ -143,15 +143,12 @@ def get_cpueff(base_command,count):
     print(result)
     print(len(result))
     cpueffsum = 0
-    errors = 0
-    for i in range(3,len(result),3):
+    for i in range(3,len(result),6):
         try:
             print(i)
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
             print(cpueffsum)
         except: 
-            errors += 1
-            print(errors)
             count -= 1
     print(cpueffsum)
     print(count)
