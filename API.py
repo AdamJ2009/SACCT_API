@@ -324,9 +324,9 @@ def get_user_metrics(name: str):
                     "submit":submit_time
                 },
                 "days_back":{
-                    "7":None,
-                    "30":None,
-                    "90":None
+                    7:None,
+                    30:None,
+                    90:None
                 }
         }
         days_back = [7,30,90]
