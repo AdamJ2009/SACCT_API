@@ -84,6 +84,7 @@ def get_shape(base_command,count):
     result = result.split("|")
     node = 0
     cpu = 0
+    task = 0
     print(result)
     nodelist = {}
     shape_ver = {}
