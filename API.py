@@ -92,15 +92,16 @@ def get_shape(base_command,count):
     }
     multi_core = {
         "count":0,
-        "avg_cpu":None
+        "avg_cpu":0
     }
     multi_node = {
         "count": 0,
-        "avg_cpu":None,
-        "avg_node":None,
-        "avg_cpu_per_node":None
+        "avg_cpu":0,
+        "avg_node":0,
+        "avg_cpu_per_node":0
     }
     shapes = 0
+    print(result)
     for i in range(8,len(result),8):
         node += int(result[i])
         cpu += int(result[i+1])
