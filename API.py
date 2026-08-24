@@ -101,7 +101,6 @@ def get_shape(base_command,count):
         "avg_cpu_per_node":0
     }
     shapes = 0
-    print(result)
     for i in range(8,len(result),8):
         node += int(result[i])
         cpu += int(result[i+1])
@@ -252,6 +251,7 @@ def diskquota(user):
                     }
                 }
             qutoanet[str(quota[0])] = quota_json
+        print(len(qutoanet))
         if qutoanet is {}:
             return {"filesystem":"innaccessable"}
         return qutoanet
