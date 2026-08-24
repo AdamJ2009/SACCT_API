@@ -115,7 +115,8 @@ def convert_mb(value):
     if len(value) == 0:
         return 0
     letter = value[-1]
-    value = int(value[0:len(value)])
+    value = int(value[0:len(value)-1])
+    print(value)
     if letter == "G":
         return value * 1024
     elif letter == "M":
