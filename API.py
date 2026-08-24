@@ -75,6 +75,7 @@ def get_job_times(base_command,count: int):
     return diff/count,queue/count
 
 def get_shape(base_command,count):
+    base_command = base_command.replace("-X","") 
     command = base_command + " -P -o NNodes,NCPUS,Ntasks,Nodelist"
     print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
