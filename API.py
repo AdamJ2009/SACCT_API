@@ -138,7 +138,7 @@ def get_metrics(base_command,count):
     result = result.replace("\n","|")
     result = result.split("|")
     print(result)
-    cpueffsum = datetime.timedelta(hours=0,minutes=0,seconds=0)
+    cpueffsum = 0
     memeffsum = 0
     for i in range(5,len(result),5):
         cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
