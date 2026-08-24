@@ -141,12 +141,14 @@ def get_cpueff(base_command,count):
     result = result.split("|")
     print(result)
     cpueffsum = 0
-    for i in range(3,len(result),3):
+    for i in range(1,len(result),3):
         try:
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
             print(cpueffsum)
         except: 
             count -= 1
+    print(cpueffsum)
+    print(count)
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
