@@ -138,15 +138,15 @@ def get_shape(base_command,count):
 def format_shapes(single,multi,node):
     shape = {}
     if single["count"] >= 1:
-        shape["single"] = single
+        shape["single_core"] = single
     if multi["count"] >= 1:
         multi["avg_cpu"] = multi["avg_cpu"] / multi["count"]
-        shape["multi"] = multi
+        shape["multi_core"] = multi
     if node["count"] >= 1:
         node["avg_cpu"] = node["avg_cpu"] / node["count"]
         node["avg_node"] = node["avg_node"] / node["count"]
         node["avg_cpu_per_node"] = node["avg_cpu_per_node"] / node["count"]
-        shape["node"] = node
+        shape["multi_node"] = node
     return shape #will give at least one shape if any job exists
 
 def get_partition_list(base_command):
@@ -235,11 +235,28 @@ def diskquota(user):
         result = clean_bytes(result)
         result = result.split('\n')
         result = [' '.join(string.split()) for string in result]
-        result = result[2]
-        result = result.split(" ")
-        return result[1:7]
+        qutoanet = {}
+        for i in range(2, len(result)):
+            v_result = result[i]
+            quota = v_result.split(" ")
+            quota_json ={ 
+                "breakdown":{
+                    "blocks":{
+                        "used_bytes":quota[1],
+                        "quota_bytes":quota[2],
+                        "limit_bytes":quota[3]
+                    },
+                    "files":{
+                        "used":quota[4],
+                        "quota":quota[5],
+                        "limit":quota[6]
+                    }
+                }
+            }
+            qutoanet[str(quota[0])] = quota_json
+        return qutoanet
     except:
-        return [None] * 6
+        return {"filesystem":"innaccessable"}
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -292,18 +309,7 @@ def get_user_metrics(name: str):
                     "nodelist":nodelist,
                     "shapelist":shapelist
                 },
-                "quotas":{
-                    "blocks":{
-                        "used_bytes":quota[0],
-                        "quota_bytes":quota[1],
-                        "limit_bytes":quota[2]
-                    },
-                    "files":{
-                        "used":quota[3],
-                        "quota":quota[4],
-                        "limit":quota[5]
-                    }
-                },
+                "quotas":quota,
                 "efficiency": {
                     "cpu%": cpueff,
                     "mem%": memeff
