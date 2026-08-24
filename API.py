@@ -97,7 +97,8 @@ def get_shape(base_command,count):
     multi_node = {
         "count": 0,
         "avg_cpu":None,
-        "avg_node":None
+        "avg_node":None,
+        "avg_cpu_per_node":None
     }
     shapes = 0
     for i in range(8,len(result),8):
@@ -135,12 +136,12 @@ def get_shape(base_command,count):
 
 def format_shapes(single,multi,node):
     shape = {}
-    if single["count"] == 1:
+    if single["count"] >= 1:
         shape["single"] = single
-    if multi["count"] == 1:
+    if multi["count"] >= 1:
         multi["avg_cpu"] = multi["avg_cpu"] / multi["count"]
         shape["multi"] = multi
-    if node["count"] == 1:
+    if node["count"] >= 1:
         node["avg_cpu"] = node["avg_cpu"] / node["count"]
         node["avg_node"] = node["avg_node"] / node["count"]
         node["avg_cpu_per_node"] = node["avg_cpu_per_node"] / node["count"]
