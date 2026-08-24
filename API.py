@@ -159,7 +159,7 @@ def get_memeff(base_command,count):
     print(result)
     for i in range(1,len(result)):
         try:
-            memeff += convert_mb(result[i]) / convert_mb(result[i+1])
+            memeff += convert_mb(result[i+1]) / convert_mb(result[i])
         except: 
             count -= 1
     return memeff/count, #Will only fail if all metrics fail
@@ -210,6 +210,9 @@ def get_user_metrics(name: str):
         except:
             memeff = "Missing"
         quota = diskquota(name)
+        print("")
+        print(cpueff,memeff)
+        print("")
         data = { "user":name,
                 "last":{
                     "access":access_str,
