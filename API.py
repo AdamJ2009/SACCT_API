@@ -82,7 +82,7 @@ def get_shape(base_command,count):
     result = result.replace("\n","|")
     result = result.split("|")
     node = 0
-    cpu = 0
+    cpu = 0 
     task = 0
     nodelist = {}
     shape_ver = {}
@@ -241,7 +241,8 @@ def get_user_metrics(name: str):
                 "jobs":{
                     "average_time":str(average_time),
                     "average_queue":str(average_queue),
-                    "count":count
+                    "count":count,
+                    "partitions":partitions
                 },
                 "shape":
                 {
@@ -251,7 +252,6 @@ def get_user_metrics(name: str):
                     "nodelist":nodelist,
                     "shapelist":shapelist
                 },
-                "partitions":partitions,
                 "quotas":{
                     "blocks":{
                         "Used(bytes)":quota[0],
