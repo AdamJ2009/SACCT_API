@@ -252,10 +252,11 @@ def diskquota(user):
                     }
                 }
             qutoanet[str(quota[0])] = quota_json
+        if qutoanet is {}:
+            return {"filesystem":"innaccessable"}
         return qutoanet
     except:
-        x = {"filesystem":"innaccessable"}
-        return x
+        return {"filesystem":"innaccessable"}
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
