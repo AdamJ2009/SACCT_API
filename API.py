@@ -77,7 +77,6 @@ def get_job_times(base_command,count: int):
 def get_shape(base_command,count):
     base_command = base_command.replace("-X","") 
     command = base_command + " -P -o NNodes,NCPUS,Ntasks,Nodelist"
-    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
@@ -85,7 +84,6 @@ def get_shape(base_command,count):
     node = 0
     cpu = 0
     task = 0
-    print(result)
     nodelist = {}
     shape_ver = {}
     shapelist = {}
