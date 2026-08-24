@@ -126,7 +126,7 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    time = datetime.datetime.strptime(result[i], '%H:%M:%S')
+    time = datetime.datetime.strptime(value, '%H:%M:%S')
     delta = datetime.timedelta(hours=time.hour,minutes=time.minute,seconds=time.second)
     return int(delta.total_seconds())
 
