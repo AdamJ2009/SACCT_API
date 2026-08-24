@@ -156,9 +156,10 @@ def get_memeff(base_command,count):
     result = result.replace("\n","|")
     result = result.split("|")
     memeff = 0
+    print(result)
     for i in range(1,len(result)):
         try:
-            memeff = convert_mb(result[i]) / convert_mb(result[i+1])
+            memeff += convert_mb(result[i]) / convert_mb(result[i+1])
         except: 
             count -= 1
     return memeff/count, #Will only fail if all metrics fail
