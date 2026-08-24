@@ -131,8 +131,8 @@ def time_converter(value):
     delta = datetime.timedelta(hours=time.hour,minutes=time.minute,seconds=time.second)
     return int(delta.total_seconds())
 
-def get_metrics(base_command,count):
-    command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS,MaxRSS,Reqmem"
+def get_cpueff(base_command,count):
+    command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS"
     print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
@@ -140,16 +140,28 @@ def get_metrics(base_command,count):
     result = result.split("|")
     print(result)
     cpueffsum = 0
-    memeffsum = 0
     for i in range(5,len(result),5):
         try:
-            lcpu,lmem = cpueffsum,memeffsum
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
-            memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
-        except: #Zero division, drop metric
-            cpueffsum,memeffsum = lcpu,lmem
+        except: 
             count -= 1
-    return cpueffsum/count,memeffsum/count
+    return cpueffsum/count, #Will only fail if all metrics fail
+
+def get_memeff(base_command,count):
+    base_command = base_command.replace("-X","") #Needed to fix to give memeff where possible
+    command = base_command + " -P -o ReqMem,MaxRSS"
+    result = subprocess.run(command, capture_output=True ,shell = True).stdout
+    result = clean_bytes(result)
+    result = result.replace("|","") #To remove wrong lines
+    result = result.replace("\n","|")
+    result = result.split("|")
+    memeff = 0
+    for i in range(1,len(result)):
+        try:
+            memeff = convert_mb(result[i]) / convert_mb(result[i+1])
+        except: 
+            count -= 1
+    return memeff/count, #Will only fail if all metrics fail
 
 def diskquota(user):
     try:
@@ -188,7 +200,14 @@ def get_user_metrics(name: str):
         average_time,average_queue = get_job_times(base_command,count)
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
-        cpueff, memeff = get_metrics(base_command,count)
+        try:
+            cpueff = get_cpueff(base_command,count) * 100
+        except:
+            cpueff= "Missing"
+        try:
+            memeff = get_memeff(base_command,count) * 100
+        except:
+            memeff = "Missing"
         quota = diskquota(name)
         data = { "user":name,
                 "last":{
@@ -212,13 +231,17 @@ def get_user_metrics(name: str):
                     "blocks":{
                         "Used(bytes)":quota[0],
                         "Quota(bytes)":quota[1],
-                        "Limit(bytes)":quota[2],
+                        "Limit(bytes)":quota[2]
                     },
                     "files":{
                         "Used":quota[3],
                         "Quota":quota[4],
-                        "Limit":quota[5],
+                        "Limit":quota[5]
                     }
+                },
+                "efficiency":{
+                    "cpu%",cpueff,
+                    "mem%",memeff
                 }
         }
         response = jsonify(data)
