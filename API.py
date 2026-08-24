@@ -127,9 +127,25 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    time = datetime.datetime.strptime(value, '%H:%M:%S')
-    delta = datetime.timedelta(hours=time.hour,minutes=time.minute,seconds=time.second)
-    return int(delta.total_seconds())
+    #h:m:s
+    if re.search("^\d+:\d+:\d+$",value):
+        days = 0
+        ms = 0
+        time = datetime.datetime.strptime(value, '%H:%M:%S')
+    #d-h:m:s
+    if re.search("^\d+-\d+:\d+:\d+$",value):
+        value = value.split("-")
+        days = int(value[0])
+        ms = 0
+        time = datetime.datetime.strptime(value[1], '%H:%M:%S')
+    #m:s.ms
+    if re.search("^\d+:\d+:\d+$",value):
+        value = value.split(".")
+        days = 0
+        ms = int(value[1])
+        time = datetime.datetime.strptime(value[0], '%M:%S')
+    delta = datetime.timedelta(days=days,hours=time.hour,minutes=time.minute,seconds=time.second)
+    return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
     base_command = base_command.replace("-X","") #Needed to fix to give totalCPU where possible
@@ -140,14 +156,10 @@ def get_cpueff(base_command,count):
     result = clean_bytes(result)
     result = result.replace("\n","|")
     result = result.split("|")
-    print(result)
-    print(len(result))
     cpueffsum = 0
     for i in range(3,len(result),6):
         try:
-            print(i)
             cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
-            print(cpueffsum)
         except: 
             count -= 1
     print(cpueffsum)
