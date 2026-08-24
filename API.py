@@ -87,6 +87,9 @@ def get_shape(base_command,count):
     node = 0
     cpu = 0
     nodelist = {}
+    shape_ver = {}
+    shapelist = {}
+    shapes = 0
     for i in range(4,len(result),4):
         print(i//4)
         node += int(result[i])
@@ -95,7 +98,18 @@ def get_shape(base_command,count):
             nodelist[result[i+3]] = 1
         else:
             nodelist[result[i+3]] += 1
-    return node/count,cpu/count,0,nodelist
+        text_shape = str(result[i])+str(result[i+1])+(str(result[i+3]))
+        if text_shape not in shape_ver:
+            shape_ver[text_shape] = shapes
+            shapelist[shapes]["count"] = 1
+            shapelist[shapes]["nodes"] = int(result[i])
+            shapelist[shapes]["cpu"] = int(result[i+1])
+            shapelist[shapes]["nodelist"] = result[i+3]
+            shapes += 1
+        else:
+            v = shape_ver[text_shape]
+            shapelist[v]["count"] += 1
+    return node/count,cpu/count,0,nodelist,shapelist
 
 def get_partition_list(base_command):
     command = base_command + " -P -o Partition"
@@ -127,6 +141,7 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
+    print(value)
     if re.search("^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
@@ -139,7 +154,6 @@ def time_converter(value):
         time = datetime.datetime.strptime(value[1], '%H:%M:%S')
     #m:s.ms
     elif re.search("^\d+:\d+.\d+$",value):
-        print(value)
         value = value.split(".")
         days = 0
         ms = int(value[1])
@@ -220,7 +234,7 @@ def get_user_metrics(name: str):
         count = get_count_jobs(base_command)
         count = int(count) - 2 #Table header needs to go as well
         average_time,average_queue = get_job_times(base_command,count)
-        node,cpu,tasks,nodelist = get_shape(base_command,count)
+        node,cpu,tasks,nodelist,shapelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
         try:
             cpueff = float(get_cpueff(base_command,count)[0]) * 100
@@ -249,7 +263,8 @@ def get_user_metrics(name: str):
                     "avg_nodes":node,
                     "avg_cpu":cpu,
                     "avg_tasks":tasks,
-                    "nodelist":nodelist
+                    "nodelist":nodelist,
+                    "shapelist":shapelist
                 },
                 "partitions":partitions,
                 "quotas":{
