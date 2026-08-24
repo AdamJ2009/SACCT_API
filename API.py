@@ -112,6 +112,8 @@ def get_partition_list(base_command):
     return partitions
 
 def convert_mb(value):
+    if len(value) == 0:
+        return 0
     letter = value[-1]
     value = int(value[0:len(value)])
     if letter == "G":
