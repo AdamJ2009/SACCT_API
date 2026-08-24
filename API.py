@@ -262,7 +262,7 @@ def time_metrics(name,access_str,last_access,days_back):
     base_command = "sacct -X " + user + start + end
     submit_time = get_time_submit(base_command)
     if submit_time == "Nothing in last 90 days":
-        return {days_back:None}
+        return "none"
     count = get_count_jobs(base_command)
     count = int(count) - 2 #Table header needs to go as well
     average_time,average_queue = get_job_times(base_command,count)
@@ -279,7 +279,6 @@ def time_metrics(name,access_str,last_access,days_back):
         memeff = "Missing"
     quota = diskquota(name)
     data = {
-        days_back:{
             "jobs":{
                     "average_time":str(average_time),
                     "average_queue":str(average_queue),
@@ -301,7 +300,6 @@ def time_metrics(name,access_str,last_access,days_back):
                 "mem%": memeff
             }
         }
-    }
     return data
     
 @app.route('/user/<string:name>',methods=['GET'])
@@ -325,11 +323,16 @@ def get_user_metrics(name: str):
                     "access":access_str,
                     "submit":submit_time
                 },
-                "days_back":{}
+                "days_back":{
+                    "7":None,
+                    "30":None,
+                    "90":None
+                }
         }
         days_back = [7,30,90]
         for day in days_back:
-            data["days_back"] = time_metrics(name,access_str,last_access,day)
+            print(day)
+            data["days_back"][day] = time_metrics(name,access_str,last_access,day)
         response = jsonify(data)
         response.status_code = 200
         return response
