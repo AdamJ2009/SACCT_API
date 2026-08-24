@@ -333,6 +333,7 @@ def get_user_metrics(name: str):
         for day in days_back:
             print(day)
             data["days_back"][day] = time_metrics(name,access_str,last_access,day)
+        print(data)
         response = jsonify(data)
         response.status_code = 200
         return response
