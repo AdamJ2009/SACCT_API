@@ -260,7 +260,7 @@ def time_metrics(name,access_str,last_access,days_back):
     end =  "-E " + access_str 
     start  = "-S " + str((last_access - datetime.timedelta(days = days_back)).strftime('%Y-%m-%d')) + " " #90 days forced limit
     base_command = "sacct -X " + user + start + end
-    submit_time = get_time_submit(base_command,days_back)
+    submit_time = get_time_submit(base_command)
     if submit_time == "Nothing in last 90 days":
         return {days_back:None}
     count = get_count_jobs(base_command)
