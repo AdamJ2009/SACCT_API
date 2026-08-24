@@ -254,6 +254,55 @@ def diskquota(user):
         return qutoanet
     except:
         return {}
+
+def time_metrics(name,access_str,last_access,days_back):
+    user = "-u " + name + " "
+    end =  "-E " + access_str 
+    start  = "-S " + str((last_access - datetime.timedelta(days = days_back)).strftime('%Y-%m-%d')) + " " #90 days forced limit
+    base_command = "sacct -X " + user + start + end
+    submit_time = get_time_submit(base_command,days_back)
+    if submit_time == "Nothing in last 90 days":
+        return {days_back:None}
+    count = get_count_jobs(base_command)
+    count = int(count) - 2 #Table header needs to go as well
+    average_time,average_queue = get_job_times(base_command,count)
+    node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command,count)
+    shape = format_shapes(single,multi,node_shape)
+    partitions = get_partition_list(base_command)
+    try:
+        cpueff = float(get_cpueff(base_command,count)[0]) * 100
+    except:
+        cpueff= "Missing"
+    try:
+        memeff = float(get_memeff(base_command,count)[0]) * 100
+    except:
+        memeff = "Missing"
+    quota = diskquota(name)
+    data = {
+        days_back:{
+            "jobs":{
+                    "average_time":str(average_time),
+                    "average_queue":str(average_queue),
+                    "count":count,
+                    "partitions":partitions,
+                    "shapes":shape,
+            },
+            "gen_avg":
+            {
+                "avg_nodes":node,
+                "avg_cpu":cpu,
+                "avg_tasks":tasks,
+                "nodelist":nodelist,
+                "shapelist":shapelist
+            },
+            "quotas":quota,
+            "efficiency": {
+                "cpu%": cpueff,
+                "mem%": memeff
+            }
+        }
+    }
+    return data
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
@@ -271,47 +320,16 @@ def get_user_metrics(name: str):
         submit_time = get_time_submit(base_command)
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str)
-        count = get_count_jobs(base_command)
-        count = int(count) - 2 #Table header needs to go as well
-        average_time,average_queue = get_job_times(base_command,count)
-        node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command,count)
-        shape = format_shapes(single,multi,node_shape)
-        partitions = get_partition_list(base_command)
-        try:
-            cpueff = float(get_cpueff(base_command,count)[0]) * 100
-        except:
-            cpueff= "Missing"
-        try:
-            memeff = float(get_memeff(base_command,count)[0]) * 100
-        except:
-            memeff = "Missing"
-        quota = diskquota(name)
         data = { "user":name,
                 "last":{
                     "access":access_str,
                     "submit":submit_time
                 },
-                "jobs":{
-                    "average_time":str(average_time),
-                    "average_queue":str(average_queue),
-                    "count":count,
-                    "partitions":partitions,
-                    "shapes":shape,
-                },
-                "gen_avg":
-                {
-                    "avg_nodes":node,
-                    "avg_cpu":cpu,
-                    "avg_tasks":tasks,
-                    "nodelist":nodelist,
-                    "shapelist":shapelist
-                },
-                "quotas":quota,
-                "efficiency": {
-                    "cpu%": cpueff,
-                    "mem%": memeff
-                }
+                "days_back":{}
         }
+        days_back = [7,30,90]
+        for day in days_back:
+            data["days_back"] = time_metrics(name,access_str,last_access,day)
         response = jsonify(data)
         response.status_code = 200
         return response
