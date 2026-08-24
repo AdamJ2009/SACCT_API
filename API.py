@@ -238,7 +238,9 @@ def diskquota(user):
         for i in range(2, len(result)):
             v_result = result[i]
             quota = v_result.split(" ")
-            quota_json ={ 
+            quota_json = {"filesystem":None}
+            quota_json = { 
+                    "user":quota[0],
                     "blocks":{
                         "used_bytes":quota[1],
                         "quota_bytes":quota[2],
@@ -250,9 +252,8 @@ def diskquota(user):
                         "limit":quota[6]
                     }
                 }
-            qutoanet[str(quota[0])] = quota_json
-        print(len(qutoanet))
-        if qutoanet is {}:
+            qutoanet["filesystem"] = quota_json
+        if (len(qutoanet)) == 0:
             return {"filesystem":"innaccessable"}
         return qutoanet
     except:
