@@ -89,26 +89,28 @@ def get_shape(base_command,count):
     shape_ver = {}
     shapelist = {}
     shapes = 0
-    for i in range(4,len(result),4):
+    for i in range(8,len(result),8):
         node += int(result[i])
         cpu += int(result[i+1])
+        task += int(result[i+2])
         if result[i+3] not in nodelist:
             nodelist[result[i+3]] = 1
         else:
             nodelist[result[i+3]] += 1
-        text_shape = str(result[i])+str(result[i+1])+(str(result[i+3]))
+        text_shape = str(result[i])+"|"+str(result[i+1])+"|"+str(result[i+2])+"|"+(str(result[i+3]))
         if text_shape not in shape_ver:
             shape_ver[text_shape] = shapes
             shapelist[shapes] = {}
             shapelist[shapes]["count"] = 1
             shapelist[shapes]["nodes"] = int(result[i])
             shapelist[shapes]["cpu"] = int(result[i+1])
+            shapelist[shapes]["task"] = int(result[i+2])
             shapelist[shapes]["nodelist"] = result[i+3]
             shapes += 1
         else:
             v = shape_ver[text_shape]
             shapelist[v]["count"] += 1
-    return node/count,cpu/count,0,nodelist,shapelist
+    return node/count,cpu/count,task/count,nodelist,shapelist
 
 def get_partition_list(base_command):
     command = base_command + " -P -o Partition"
