@@ -127,24 +127,25 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    #h:m:s
+    print(value)
     if re.search("^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
         time = datetime.datetime.strptime(value, '%H:%M:%S')
     #d-h:m:s
-    if re.search("^\d+-\d+:\d+:\d+$",value):
+    elif re.search("^\d+-\d+:\d+:\d+$",value):
         value = value.split("-")
         days = int(value[0])
         ms = 0
         time = datetime.datetime.strptime(value[1], '%H:%M:%S')
     #m:s.ms
-    if re.search("^\d+:\d+:\d+$",value):
+    elif re.search("^\d+:\d+:\d+$",value):
         value = value.split(".")
         days = 0
         ms = int(value[1])
         time = datetime.datetime.strptime(value[0], '%M:%S')
     delta = datetime.timedelta(days=days,hours=time.hour,minutes=time.minute,seconds=time.second)
+    print(int(delta.total_seconds()*1000 + ms))
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
