@@ -125,6 +125,11 @@ def convert_mb(value):
     else:
         return value / (1024*1024)
 
+def time_converter(value)
+    time = datetime.datetime.strptime(result[i], '%H:%M:%S')
+    delta = datetime.timedelta(hours=time.hour,minutes=time.minute,seconds=time.second)
+    return int(delta.total_seconds())
+
 def get_metrics(base_command,count):
     command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS,MaxRSS,Reqmem"
     print(command)
@@ -136,7 +141,7 @@ def get_metrics(base_command,count):
     cpueffsum = datetime.timedelta(hours=0,minutes=0,seconds=0)
     memeffsum = 0
     for i in range(5,len(result),5):
-        cpueffsum += (datetime.datetime.strptime(result[i], '%H:%M:%S') / (datetime.datetime.strptime(result[i+1], '%H:%M:%S') * int(result[i+2])))
+        cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
         memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
     return cpueffsum/count,memeffsum/count
 
