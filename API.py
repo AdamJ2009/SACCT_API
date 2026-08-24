@@ -135,6 +135,7 @@ def get_cpueff(base_command,count):
     base_command = base_command.replace("-X","") #Needed to fix to give totalCPU where possible
     command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS"
     print(command)
+    print(count)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
