@@ -136,7 +136,7 @@ def get_metrics(base_command,count):
     cpueffsum = datetime.timedelta(hours=0,minutes=0,seconds=0)
     memeffsum = 0
     for i in range(5,len(result),5):
-        cpueffsum += (datetime.timedelta.strptime(result[i], '%H:%M:%S') / (datetime.timedelta.strptime(result[i+1], '%H:%M:%S') / int(result[i+2])))
+        cpueffsum += (datetime.datetime.strptime(result[i], '%H:%M:%S') / (datetime.datetime.strptime(result[i+1], '%H:%M:%S') * int(result[i+2])))
         memeffsum += (convert_mb(result[i+3])/convert_mb(result[i+4]))
     return cpueffsum/count,memeffsum/count
 
