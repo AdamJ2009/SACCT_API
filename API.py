@@ -240,7 +240,6 @@ def diskquota(user):
             v_result = result[i]
             quota = v_result.split(" ")
             quota_json ={ 
-                "breakdown":{
                     "blocks":{
                         "used_bytes":quota[1],
                         "quota_bytes":quota[2],
@@ -252,11 +251,11 @@ def diskquota(user):
                         "limit":quota[6]
                     }
                 }
-            }
             qutoanet[str(quota[0])] = quota_json
         return qutoanet
     except:
-        return {"filesystem":"innaccessable"}
+        x = {"filesystem":"innaccessable"}
+        return x
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
