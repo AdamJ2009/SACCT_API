@@ -204,11 +204,11 @@ def get_user_metrics(name: str):
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
         try:
-            cpueff = get_cpueff(base_command,count) * 100
+            cpueff = float(get_cpueff(base_command,count)) * 100
         except:
             cpueff= "Missing"
         try:
-            memeff = get_memeff(base_command,count) * 100
+            memeff = float(get_memeff(base_command,count)) * 100
         except:
             memeff = "Missing"
         quota = diskquota(name)
