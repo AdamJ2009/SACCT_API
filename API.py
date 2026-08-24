@@ -87,6 +87,18 @@ def get_shape(base_command,count):
     nodelist = {}
     shape_ver = {}
     shapelist = {}
+    single_core = {
+        "count":0
+    }
+    multi_core = {
+        "count":0,
+        "avg_cpu":None
+    }
+    multi_node = {
+        "count": 0,
+        "avg_cpu":None,
+        "avg_node":None
+    }
     shapes = 0
     for i in range(8,len(result),8):
         node += int(result[i])
@@ -109,7 +121,31 @@ def get_shape(base_command,count):
         else:
             v = shape_ver[text_shape]
             shapelist[v]["count"] += 1
-    return node/count,cpu/count,task/count,nodelist,shapelist
+        if int(result[i+1]) == 1 and int(result[i]) == 1:
+            single_core["count"] +=1
+        elif int(result[i+1])>  1 and int(result[i]) == 1:
+            multi_core['count'] += 1
+            multi_core["avg_cpu"] += int(result[i+1])
+        elif int(result[i]) > 1:
+            multi_node['count'] += 1
+            multi_node["avg_cpu"] += int(result[i+1])
+            multi_node["avg_node"] + int(result[i])
+            multi_node["avg_cpu_per_node"] += int(result[i+1]) / int(result[i])
+    return node/count,cpu/count,task/count,nodelist,shapelist,single_core,multi_core,multi_node
+
+def format_shapes(single,multi,node):
+    shape = {}
+    if single["count"] == 1:
+        shape["single"] = single
+    if multi["count"] == 1:
+        multi["avg_cpu"] = multi["avg_cpu"] / multi["count"]
+        shape["multi"] = multi
+    if node["count"] == 1:
+        node["avg_cpu"] = node["avg_cpu"] / node["count"]
+        node["avg_node"] = node["avg_node"] / node["count"]
+        node["avg_cpu_per_node"] = node["avg_cpu_per_node"] / node["count"]
+        shape["node"] = node
+    return shape #will give at least one shape if any job exists
 
 def get_partition_list(base_command):
     command = base_command + " -P -o Partition"
@@ -222,7 +258,8 @@ def get_user_metrics(name: str):
         count = get_count_jobs(base_command)
         count = int(count) - 2 #Table header needs to go as well
         average_time,average_queue = get_job_times(base_command,count)
-        node,cpu,tasks,nodelist,shapelist = get_shape(base_command,count)
+        node,cpu,tasks,nodelist,shapelist,single,multi,node = get_shape(base_command,count)
+        shape = format_shapes(single,multi,node)
         partitions = get_partition_list(base_command)
         try:
             cpueff = float(get_cpueff(base_command,count)[0]) * 100
@@ -242,9 +279,10 @@ def get_user_metrics(name: str):
                     "average_time":str(average_time),
                     "average_queue":str(average_queue),
                     "count":count,
-                    "partitions":partitions
+                    "partitions":partitions,
+                    "shapes":shape,
                 },
-                "shape":
+                "gen_avg":
                 {
                     "avg_nodes":node,
                     "avg_cpu":cpu,
@@ -254,14 +292,14 @@ def get_user_metrics(name: str):
                 },
                 "quotas":{
                     "blocks":{
-                        "Used(bytes)":quota[0],
-                        "Quota(bytes)":quota[1],
-                        "Limit(bytes)":quota[2]
+                        "used_bytes":quota[0],
+                        "quota_bytes":quota[1],
+                        "limit_bytes":quota[2]
                     },
                     "files":{
-                        "Used":quota[3],
-                        "Quota":quota[4],
-                        "Limit":quota[5]
+                        "used":quota[3],
+                        "quota":quota[4],
+                        "limit":quota[5]
                     }
                 },
                 "efficiency": {
