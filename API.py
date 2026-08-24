@@ -204,11 +204,11 @@ def get_user_metrics(name: str):
         node,cpu,tasks,nodelist = get_shape(base_command,count)
         partitions = get_partition_list(base_command)
         try:
-            cpueff = float(get_cpueff(base_command,count)) * 100
+            cpueff = float(get_cpueff(base_command,count)[0]) * 100
         except:
             cpueff= "Missing"
         try:
-            memeff = float(get_memeff(base_command,count)) * 100
+            memeff = float(get_memeff(base_command,count)[0]) * 100
         except:
             memeff = "Missing"
         quota = diskquota(name)
@@ -245,9 +245,9 @@ def get_user_metrics(name: str):
                         "Limit":quota[5]
                     }
                 },
-                "efficiency":{
-                    "cpu%",cpueff,
-                    "mem%",memeff
+                "efficiency": {
+                    "cpu%": cpueff,
+                    "mem%": memeff
                 }
         }
         response = jsonify(data)
