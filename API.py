@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session,  json, jsonify
+from werkzeug.exceptions import HTTPException
 import subprocess
 import datetime
 import re
@@ -351,6 +352,15 @@ def not_a_website():
         response = {"Error":"Method not allowed","Reason":"Not using get method"}
         response.status_code = 405
         return response
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    response = e.get_response()
+    data = {"Error":e.name,"Reason":e.description}
+    response = jsonify(data)
+    response.status_code = e.code
+    return response
+    
 
 if __name__ == "__main__":
     try:
