@@ -67,14 +67,16 @@ def get_job_times(base_command,count: int):
     diff = datetime.timedelta(seconds=0)
     queue = datetime.timedelta(hours=0,minutes=0,seconds=0)
     for i in range(3,len(result),3):
-        print(result[i])
-        start = datetime.datetime.strptime(result[i], '%Y-%m-%dT%H:%M:%S')
-        end = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
-        diff += (end-start)
-        local_queue = result[i+2]
-        (h, m, s) = local_queue.split(':')
-        d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
-        queue += d
+        try:
+            start = datetime.datetime.strptime(result[i], '%Y-%m-%dT%H:%M:%S')
+            end = datetime.datetime.strptime(result[i+1], '%Y-%m-%dT%H:%M:%S')
+            diff += (end-start)
+            local_queue = result[i+2]
+            (h, m, s) = local_queue.split(':')
+            d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
+            queue += d
+        except:
+            print(result[i:i+3])
     return diff/count,queue/count
 
 def get_shape(base_command,count):
