@@ -329,9 +329,7 @@ def get_user_metrics(name: str):
         }
         days_back = [7,30,90]
         for day in days_back:
-            print(day)
             data["days_back"][day] = time_metrics(name,access_str,last_access,day)
-        print(data)
         data["quota_filesystem"] = diskquota(name)
         response = jsonify(data)
         response.status_code = 200
@@ -355,4 +353,8 @@ def not_a_website():
         return response
 
 if __name__ == "__main__":
-    app.run(ssl_context=('cert.pem', 'key.pem'))
+    try:
+        app.run(ssl_context=('cert.pem', 'key.pem'))
+    except FileNotFoundError:
+        print("No certificate found, running with adhoc, do not deploy with adhoc")
+        app.run(ssl_context="adhoc")
