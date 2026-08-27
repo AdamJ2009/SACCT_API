@@ -129,7 +129,6 @@ def get_shape(base_command,count):
             else:
                 v = shape_ver[text_shape]
                 shapelist[v]["count"] += 1
-            print(result[i+1],result[i+2])
             if int(result[i+1]) == 1 and int(result[i+2]) == 1:
                 single_core["count"] +=1
             elif int(result[i+2])>  1 and int(result[i+1]) == 1:
@@ -144,7 +143,6 @@ def get_shape(base_command,count):
 
 def format_shapes(single,multi,node):
     shape = {}
-    print(single["count"],multi["count"],node["count"])
     if single["count"] >= 1:
         shape["single_core"] = single
     if multi["count"] >= 1:
