@@ -81,7 +81,7 @@ def get_job_times(base_command,count: int):
 
 def get_shape(base_command,count):
     base_command = base_command.replace("-X","") 
-    command = base_command + " -P -o NNodes,NCPUS,Ntasks,Nodelist"
+    command = base_command + " -P -o JobID,NNodes,NCPUS,Ntasks,Nodelist"
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
@@ -106,37 +106,39 @@ def get_shape(base_command,count):
         "avg_cpu_per_node":0
     }
     shapes = 0
-    for i in range(8,len(result),8):
-        node += int(result[i])
-        cpu += int(result[i+1])
-        task += int(result[i+2])
-        if result[i+3] not in nodelist:
-            nodelist[result[i+3]] = 1
-        else:
-            nodelist[result[i+3]] += 1
-        text_shape = str(result[i])+"|"+str(result[i+1])+"|"+str(result[i+2])+"|"+(str(result[i+3]))
-        if text_shape not in shape_ver:
-            shape_ver[text_shape] = shapes
-            shapelist[shapes] = {}
-            shapelist[shapes]["count"] = 1
-            shapelist[shapes]["nodes"] = int(result[i])
-            shapelist[shapes]["cpu"] = int(result[i+1])
-            shapelist[shapes]["task"] = int(result[i+2])
-            shapelist[shapes]["nodelist"] = result[i+3]
-            shapes += 1
-        else:
-            v = shape_ver[text_shape]
-            shapelist[v]["count"] += 1
-        if int(result[i+1]) == 1 and int(result[i]) == 1:
-            single_core["count"] +=1
-        elif int(result[i+1])>  1 and int(result[i]) == 1:
-            multi_core['count'] += 1
-            multi_core["avg_cpu"] += int(result[i+1])
-        elif int(result[i]) > 1:
-            multi_node['count'] += 1
-            multi_node["avg_cpu"] += int(result[i+1])
-            multi_node["avg_node"] + int(result[i])
-            multi_node["avg_cpu_per_node"] += int(result[i+1]) / int(result[i])
+    for i in range(5,len(result),5):
+        if re.search("^\d+\.batch$",result[i]):
+            #node i+1, cpu i+2, task i+3, nodelist i+4
+            node += int(result[i+1])
+            cpu += int(result[i+2])
+            task += int(result[i+3])
+            if result[i+3] not in nodelist:
+                nodelist[result[i+4]] = 1
+            else:
+                nodelist[result[i+4]] += 1
+            text_shape = str(result[i+1])+"|"+str(result[i+2])+"|"+str(result[i+3])+"|"+(str(result[i+4]))
+            if text_shape not in shape_ver:
+                shape_ver[text_shape] = shapes
+                shapelist[shapes] = {}
+                shapelist[shapes]["count"] = 1
+                shapelist[shapes]["nodes"] = int(result[i+1])
+                shapelist[shapes]["cpu"] = int(result[i+2])
+                shapelist[shapes]["task"] = int(result[i+3])
+                shapelist[shapes]["nodelist"] = result[i+4]
+                shapes += 1
+            else:
+                v = shape_ver[text_shape]
+                shapelist[v]["count"] += 1
+            if int(result[i+1]) == 1 and int(result[i+1]) == 1:
+                single_core["count"] +=1
+            elif int(result[i+1])>  1 and int(result[i+1]) == 1:
+                multi_core['count'] += 1
+                multi_core["avg_cpu"] += int(result[i+2])
+            elif int(result[i+1]) > 1:
+                multi_node['count'] += 1
+                multi_node["avg_cpu"] += int(result[i+2])
+                multi_node["avg_node"] + int(result[i+1])
+                multi_node["avg_cpu_per_node"] += int(result[i+2]) / int(result[i+1])
     return node/count,cpu/count,task/count,nodelist,shapelist,single_core,multi_core,multi_node
 
 def format_shapes(single,multi,node):
