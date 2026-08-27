@@ -277,7 +277,6 @@ def time_metrics(name,access_str,last_access,days_back):
         memeff = float(get_memeff(base_command,count)[0]) * 100
     except:
         memeff = "Missing"
-    quota = diskquota(name)
     data = {
             "jobs":{
                     "average_time":str(average_time),
@@ -294,7 +293,6 @@ def time_metrics(name,access_str,last_access,days_back):
                 "nodelist":nodelist,
                 "shapelist":shapelist
             },
-            "quotas":quota,
             "efficiency": {
                 "cpu%": cpueff,
                 "mem%": memeff
@@ -334,6 +332,7 @@ def get_user_metrics(name: str):
             print(day)
             data["days_back"][day] = time_metrics(name,access_str,last_access,day)
         print(data)
+        data["quota_filesystem"] = diskquota(name)
         response = jsonify(data)
         response.status_code = 200
         return response
