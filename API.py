@@ -129,9 +129,9 @@ def get_shape(base_command,count):
             else:
                 v = shape_ver[text_shape]
                 shapelist[v]["count"] += 1
-            if int(result[i+1]) == 1 and int(result[i+1]) == 1:
+            if int(result[i+1]) == 1 and int(result[i+2]) == 1:
                 single_core["count"] +=1
-            elif int(result[i+1])>  1 and int(result[i+1]) == 1:
+            elif int(result[i+2])>  1 and int(result[i+1]) == 1:
                 multi_core['count'] += 1
                 multi_core["avg_cpu"] += int(result[i+2])
             elif int(result[i+1]) > 1:
