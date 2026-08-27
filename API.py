@@ -28,11 +28,12 @@ def not_a_user_json():
     response.status_code = 404
     return response
 
-def no_data_json(name,access_str):
+def no_data_json(name,access_str,time = 90):
+    last = "Not within " + str(time) + " days"
     data = { "user":name,
                 "last":{
                     "access":access_str,
-                    "submit":"Not within 90 days"
+                    "submit":last
                 }
     }
     response = jsonify(data)
@@ -300,6 +301,45 @@ def time_metrics(name,access_str,last_access,days_back):
             }
         }
     return data
+
+@app.route('/user/<string:name>/<int:time>',methods=['GET'])
+def get_user_metrics_days(name: str, time:int):
+    if request.method == 'GET':
+        last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
+        if last_access == "not a user": 
+            return not_a_user_json()
+        else:
+            last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
+            access_str = str(last_access.strftime('%Y-%m-%d'))
+        user = "-u " + name + " "
+        end =  "-E " + access_str 
+        start  = "-S " + str((last_access - datetime.timedelta(days = time)).strftime('%Y-%m-%d')) + " " #Any single time
+        base_command = "sacct -X " + user + start + end
+        submit_time = get_time_submit(base_command)
+        if submit_time == "Nothing in last 90 days":
+            return no_data_json(name,access_str,time)
+        data = { "user":name,
+                        "last":{
+                            "access":access_str,
+                            "submit":submit_time
+                        },
+                        "days_back":{
+                            7:None,
+                            30:None,
+                            90:None
+                        }
+                }
+        data["days_back"][time] = time_metrics(name,access_str,last_access,time)
+        data["quota_filesystem"] = diskquota(name)
+        response = jsonify(data)
+        response.status_code = 200
+        return response
+    else:
+        data = {"Error":"Method not allowed","Reason":"Not using get method"}
+        response = jsonify(data)
+        response.status_code = 405
+        return response
+            
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
