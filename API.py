@@ -324,9 +324,7 @@ def get_user_metrics_days(name: str, time:int):
                             "submit":submit_time
                         },
                         "days_back":{
-                            7:None,
-                            30:None,
-                            90:None
+                            time :None
                         }
                 }
         data["days_back"][time] = time_metrics(name,access_str,last_access,time)
