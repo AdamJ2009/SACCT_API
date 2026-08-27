@@ -76,7 +76,7 @@ def get_job_times(base_command,count: int):
             d = datetime.timedelta(hours=int(h), minutes=int(m), seconds=int(s))
             queue += d
         except:
-            print(result[i:i+3])
+            count -= 1
     return diff/count,queue/count
 
 def get_shape(base_command,count):
