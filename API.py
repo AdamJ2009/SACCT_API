@@ -143,6 +143,7 @@ def get_shape(base_command,count):
 
 def format_shapes(single,multi,node):
     shape = {}
+    print(single["count"],multi["count"],node["count"])
     if single["count"] >= 1:
         shape["single_core"] = single
     if multi["count"] >= 1:
