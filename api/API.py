@@ -84,7 +84,6 @@ def get_job_times(base_command,count: int):
 def get_shape(base_command,count):
     base_command = base_command.replace("-X","") 
     command = base_command + " -P -o JobID,NNodes,NCPUS,Ntasks,Nodelist"
-    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     result = result.replace("\n","|")
@@ -113,7 +112,6 @@ def get_shape(base_command,count):
     for i in range(5,len(result),5):
         current = (result[i].split("."))[0]
         if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
-            print(current,result[i+1],result[i+2],result[i+3],result[i+4])
             last = current
             #node i+1, cpu i+2, task i+3, nodelist i+4
             node += int(result[i+1])
@@ -248,7 +246,6 @@ def diskquota(user):
         if result.returncode != 0:
             command = "quota -w -u " + user  
             result = subprocess.run(command, capture_output=True ,shell = True)
-        print(command)
         result = clean_bytes(result.stdout)
         if not result:
             return {}
