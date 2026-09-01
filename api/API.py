@@ -319,6 +319,7 @@ def time_metrics(name,access_str,last_access,days_back):
 
 @app.route('/user/<string:name>/<int:time>',methods=['GET'])
 def get_user_metrics_days(name: str, time:int):
+    print(name,time)
     if request.method == 'GET':
         last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
         if last_access == "not a user": 
@@ -356,6 +357,7 @@ def get_user_metrics_days(name: str, time:int):
     
 @app.route('/user/<string:name>',methods=['GET'])
 def get_user_metrics(name: str):
+    print(name)
     if request.method == 'GET':
         last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
         if last_access == "not a user": 
