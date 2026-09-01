@@ -88,14 +88,14 @@ module SacctApi
           ssl = config['ssl'] ? '' : '-k '
           ssl + url
         end
-      end
 
-      def json_check!(filename)
-        unless filename =~ /\.json$/i
-          puts "Error: Invalid json filename '#{filename}'. Must end with .json"
-          exit 1
+        def json_check!(filename)
+          unless filename =~ /\.json$/i
+            puts "Error: Invalid json filename '#{filename}'. Must end with .json"
+            exit 1
+          end
+          filename
         end
-        filename
       end
 
       # Gives version
