@@ -5,6 +5,6 @@ require_relative 'sacct_api/cli'
 
 # Primary namespace for the Sacctapi gem.
 # Handles json outputs
-module Sacct_api
+module SacctApi
   class Error < StandardError; end
 end

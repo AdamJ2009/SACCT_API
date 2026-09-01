@@ -10,16 +10,19 @@ require 'yaml'
 require_relative 'version'
 require_relative '../config/configmanager'
 
-module Sacct_api
+module SacctApi
   module CLI
+    # CLI commands
     module Commands
       extend Dry::CLI::Registry
 
+      # Update the config file for url changes
       module Config
+        # Sets config values
         class Set < Dry::CLI::Command
           desc 'Save API configuration settings'
-          option :url, aliases:['-u'], type: :string, desc: 'API base URL'
-          option :ssl, alaises:['-s'], type: :boolean, desc: 'Verify SSL certificate'
+          option :url, aliases: ['-u'], type: :string, desc: 'API base URL'
+          option :ssl, alaises: ['-s'], type: :boolean, desc: 'Verify SSL certificate'
 
           def call(**opts)
             current = ConfigManager.load
@@ -30,6 +33,7 @@ module Sacct_api
           end
         end
 
+        # Shows current values
         class Show < Dry::CLI::Command
           desc 'Display current API configuration settings'
 
@@ -42,24 +46,26 @@ module Sacct_api
         end
       end
 
+      # Reports back the json file
       class Report < Dry::CLI::Command
         desc 'Report based on flags sent to the cli'
-        option :days, aliases:['-d','--date'], type: :integer, desc: 'Go back n amount of days'
-        option :timespread, aliases:["-t","--times"], type: :boolean, desc: "Show 7,30,90 days"
-        option :user, aliases:['-u','--username'], type: :string, desc: "Select user(leave blank for self)"
-        option :json, aliases:["-j"], type: :string, desc: "Save json if not none"
-        
+        option :days, aliases: ['-d', '--date'], type: :integer, desc: 'Go back n amount of days'
+        option :timespread, aliases: ['-t', '--times'], type: :boolean, desc: 'Show 7,30,90 days'
+        option :user, aliases: ['-u', '--username'], type: :string, desc: 'Select user(leave blank for self)'
+        option :json, aliases: ['-j'], type: :string, desc: 'Save json if not none'
+
         def call(**opts)
           user = opts[:user].nil? ? current_user : opts[:user]
           days = opts[:days].nil? ? 30 : opts[:days]
-          result = opts[:timespread] ? timespread(user) : single_time(user,days)
-          unless opts[:json].nil?
-            json = json_check(opts[:json])
-            File.write(json,JSON.dump(result))
-          end
+          result = opts[:timespread] ? timespread(user) : single_time(user, days)
+          return if opts[:json].nil?
+
+          json = json_check(opts[:json])
+          File.write(json, JSON.dump(result))
         end
 
         private
+
         def current_user
           Etc.getlogin || ENV['USER'] || ENV['LOGNAME'] || Etc.getpwuid(Process.uid)&.name
         rescue StandardError
@@ -67,23 +73,24 @@ module Sacct_api
         end
 
         def timespread(user)
-          cmd = "curl " + get_url + "/user/" + user
-          result = `#{cmd}`
+          cmd = "curl #{url}/user/#{user}"
+          `#{cmd}`
         end
 
-        def single_time(user,days)
-          cmd = "curl " + get_url + "/user/" + user + "/" + days.to_s
-          result = `#{cmd}`
+        def single_time(user, days)
+          cmd = "curl #{url}/user/#{user}/#{days}"
+          `#{cmd}`
         end
 
-        def get_url
+        def url
           config = ConfigManager.load
           url = config['url']
           ssl = config['ssl'] ? '' : '-k '
-          return ssl + url 
+          ssl + url
         end
       end
 
+      # Gives version
       class Version < Dry::CLI::Command
         desc 'Print the version'
 
@@ -91,11 +98,10 @@ module Sacct_api
           puts "SacctAPI version #{Sacct_api::VERSION}"
         end
       end
-      register 'report', Report
       register 'config set', Config::Set
       register 'config show', Config::Show
+      register 'report', Report
       register 'version', Version, aliases: ['-v', '--version']
     end
   end
 end
-

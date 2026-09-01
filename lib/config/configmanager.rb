@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 require 'yaml'
 require 'fileutils'
 
+# Manages the config safe values
 class ConfigManager
   # Saves config in ~/.config/sacct_api/config.yml (macOS/Linux standard)
   CONFIG_DIR = File.expand_path('~/config')

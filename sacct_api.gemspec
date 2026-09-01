@@ -4,7 +4,7 @@ require_relative 'lib/sacct_api/version'
 
 Gem::Specification.new do |spec|
   spec.name        = 'sacct_api'
-  spec.version     = Sacct_api::VERSION
+  spec.version     = SacctApi::VERSION
   spec.authors     = ['AdamJ2009']
   spec.email       = ['adamdj2009@gmail.com']
 
