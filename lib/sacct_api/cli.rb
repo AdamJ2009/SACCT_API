@@ -48,6 +48,7 @@ module Sacct_api
           url = config['url']
           ssl = config['ssl'] ? '' : '-k '
           return ssl + url 
+        end
       end
       register 'report', Report
     end
