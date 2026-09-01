@@ -410,7 +410,7 @@ def handle_exception(e):
 
 if __name__ == "__main__":
     try:
-        app.run(ssl_context=('cert.pem', 'key.pem'),port=9999)
+        app.run(ssl_context=('cert.pem', 'key.pem'),host='0.0.0.0',port=9999,use_reloader=False)
     except FileNotFoundError:
         print("No certificate found, running with adhoc, do not deploy with adhoc")
-        app.run(ssl_context="adhoc",port=9999)
+        app.run(ssl_context="adhoc",host='0.0.0.0',port=9999,use_reloader=False)
