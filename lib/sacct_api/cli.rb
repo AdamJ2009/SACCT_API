@@ -34,7 +34,7 @@ module Sacct_api
         end
 
         def timespread(user)
-          cmd = "curl " + get_url + "/" + user
+          cmd = "curl " + get_url + "/user/" + user
           puts cmd
           result = `#{cmd}`
           puts result
