@@ -1,3 +1,3 @@
 module Sacct_api
-  VERSION = 'alpha0.5.0' unless defined?(AlcesSacct::VERSION)
+  VERSION = '1.0.0' unless defined?(AlcesSacct::VERSION)
 end
