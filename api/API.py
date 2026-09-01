@@ -107,7 +107,7 @@ def get_shape(base_command,count):
     }
     shapes = 0
     for i in range(5,len(result),5):
-        if re.search("^\d+\.batch$",result[i]):
+        if re.search(r"^\d+\.batch$",result[i]):
             #node i+1, cpu i+2, task i+3, nodelist i+4
             node += int(result[i+1])
             cpu += int(result[i+2])
@@ -184,18 +184,18 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    if re.search("^\d+:\d+:\d+$",value):
+    if re.search(r"^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
         time = datetime.datetime.strptime(value, '%H:%M:%S')
     #d-h:m:s
-    elif re.search("^\d+-\d+:\d+:\d+$",value):
+    elif re.search(r"^\d+-\d+:\d+:\d+$",value):
         value = value.split("-")
         days = int(value[0])
         ms = 0
         time = datetime.datetime.strptime(value[1], '%H:%M:%S')
     #m:s.ms
-    elif re.search("^\d+:\d+.\d+$",value):
+    elif re.search(r"^\d+:\d+.\d+$",value):
         value = value.split(".")
         days = 0
         ms = int(value[1])
@@ -410,7 +410,7 @@ def handle_exception(e):
 
 if __name__ == "__main__":
     try:
-        app.run(ssl_context=('cert.pem', 'key.pem'),port=6767)
+        app.run(ssl_context=('cert.pem', 'key.pem'),port=9999)
     except FileNotFoundError:
         print("No certificate found, running with adhoc, do not deploy with adhoc")
-        app.run(ssl_context="adhoc",port=6767)
+        app.run(ssl_context="adhoc",port=9999)
