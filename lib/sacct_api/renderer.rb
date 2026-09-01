@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'tty_table'
+require 'tty-table'
 
 module SacctApi
   # TTY table renderer
