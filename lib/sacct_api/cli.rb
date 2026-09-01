@@ -56,9 +56,7 @@ module SacctApi
         option :json, aliases: ['-j'], type: :string, desc: 'Save json if not none'
 
         def call(**opts)
-          user = opts[:user].nil? ? current_user : opts[:user]
-          days = opts[:days].nil? ? 30 : opts[:days]
-          result = opts[:timespread] ? timespread(user) : single_time(user, days)
+          api_call(opts)
           Renderer.render(result)
           return if opts[:json].nil?
 
@@ -67,6 +65,12 @@ module SacctApi
         end
 
         private
+
+        def api_call(opts)
+          user = opts[:user].nil? ? current_user : opts[:user]
+          days = opts[:days].nil? ? 30 : opts[:days]
+          opts[:timespread] ? timespread(user) : single_time(user, days)
+        end
 
         def current_user
           Etc.getlogin || ENV['USER'] || ENV['LOGNAME'] || Etc.getpwuid(Process.uid)&.name
