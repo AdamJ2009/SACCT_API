@@ -60,7 +60,7 @@ module SacctApi
           result = opts[:timespread] ? timespread(user) : single_time(user, days)
           return if opts[:json].nil?
 
-          json = json_check(opts[:json])
+          json = json_check!(opts[:json])
           File.write(json, JSON.dump(result))
         end
 
@@ -88,6 +88,14 @@ module SacctApi
           ssl = config['ssl'] ? '' : '-k '
           ssl + url
         end
+      end
+
+      def json_check!(filename)
+        unless filename =~ /\.json$/i
+          puts "Error: Invalid json filename '#{filename}'. Must end with .json"
+          exit 1
+        end
+        filename
       end
 
       # Gives version
