@@ -247,6 +247,7 @@ def diskquota(user):
         if result.returncode != 0:
             command = "quota -w -u " + user  
             result = subprocess.run(command, capture_output=True ,shell = True).stdout
+        print(command)
         result = clean_bytes(result)
         result = result.split('\n')
         result = [' '.join(string.split()) for string in result]
