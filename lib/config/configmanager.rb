@@ -8,7 +8,7 @@ class ConfigManager
 
   # Default values if no file exists yet
   DEFAULT_CONFIG = {
-    'url' => 'https://127.0.0.1:6767',
+    'url' => 'https://127.0.0.1:5000',
     'ssl' => false
   }.freeze
 
