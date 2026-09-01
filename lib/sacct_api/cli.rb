@@ -85,12 +85,14 @@ module SacctApi
 
         def timespread(user)
           cmd = "curl #{url}/user/#{user}"
-          `#{cmd}`
+          raw_response = `#{cmd}`
+          JSON.parse(raw_response, symbolize_names: true)
         end
 
         def single_time(user, days)
           cmd = "curl #{url}/user/#{user}/#{days}"
-          `#{cmd}`
+          raw_response = `#{cmd}`
+          JSON.parse(raw_response, symbolize_names: true)
         end
 
         def url
