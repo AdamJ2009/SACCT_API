@@ -3,7 +3,7 @@ require 'fileutils'
 
 class ConfigManager
   # Saves config in ~/.config/sacct_api/config.yml (macOS/Linux standard)
-  CONFIG_DIR = File.expand_path('~/.config/sacct_api')
+  CONFIG_DIR = File.expand_path('~/config')
   CONFIG_FILE = File.join(CONFIG_DIR, 'config.yml')
 
   # Default values if no file exists yet
