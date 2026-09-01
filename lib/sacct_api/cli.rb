@@ -8,6 +8,7 @@ require 'json'
 require 'yaml'
 
 require_relative 'version'
+require_relative 'renderer'
 require_relative '../config/configmanager'
 
 module SacctApi
@@ -58,10 +59,11 @@ module SacctApi
           user = opts[:user].nil? ? current_user : opts[:user]
           days = opts[:days].nil? ? 30 : opts[:days]
           result = opts[:timespread] ? timespread(user) : single_time(user, days)
+          Renderer.render(result)
           return if opts[:json].nil?
 
           json = json_check!(opts[:json])
-          File.write(json, JSON.dump(result))
+          File.write(json, JSON.pretty_generate(result))
         end
 
         private
