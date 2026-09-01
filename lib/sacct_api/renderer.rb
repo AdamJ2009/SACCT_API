@@ -7,7 +7,7 @@ module SacctApi
   # TTY table renderer
   class Renderer
     def self.render(_data)
-      quota_table(data)
+      quota_table(_data)
     end
     private
     def quota_table(data)
