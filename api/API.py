@@ -3,6 +3,8 @@ from werkzeug.exceptions import HTTPException
 import subprocess
 import datetime
 import re
+import os
+import sys
 
 app = Flask(__name__)
 
@@ -408,9 +410,31 @@ def handle_exception(e):
     return response
     
 
-if __name__ == "__main__":
-    try:
-        app.run(ssl_context=('cert.pem', 'key.pem'),host='0.0.0.0',port=9999,use_reloader=False)
-    except FileNotFoundError:
+def main():
+    cert_file = 'cert.pem'
+    key_file = 'key.pem'
+
+    # Check for certificates before starting the socket
+    if os.path.exists(cert_file) and os.path.exists(key_file):
+        ssl_ctx = (cert_file, key_file)
+        print("Starting server with custom SSL certificates...")
+    else:
         print("No certificate found, running with adhoc, do not deploy with adhoc")
-        app.run(ssl_context="adhoc",host='0.0.0.0',port=9999,use_reloader=False)
+        ssl_ctx = 'adhoc'
+
+    try:
+        app.run(
+            port=5000,
+            ssl_context=ssl_ctx,
+        )
+    except KeyboardInterrupt:
+        print("\nShutting down server gracefully...")
+        sys.exit(0)
+    except OSError as e:
+        if "Address already in use" in str(e):
+            print("\n[Error] Port 5000 is already in use. Run 'pkill -f API.py' or pick another port.")
+        else:
+            raise e
+
+if __name__ == '__main__':
+    main()
