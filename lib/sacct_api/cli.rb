@@ -35,12 +35,14 @@ module Sacct_api
 
         def timespread(user)
           cmd = "curl " + get_url + "/" + user
-          `#{cmd}`
+          result = `#{cmd}`
+          puts result
         end
 
         def single_time(user,days)
           cmd = "curl " + get_url + "/" + user + "/" + days.to_s
-          `#{cmd}`
+          result = `#{cmd}`
+          puts result
         end
 
         def get_url
