@@ -57,6 +57,7 @@ module SacctApi
 
         def call(**opts)
           result = api_call(opts)
+          puts result
           Renderer.render(result)
           return if opts[:json].nil?
 
