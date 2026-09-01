@@ -13,6 +13,7 @@ def clean_bytes(data):
 
 def get_last_user_access_time(user):
     command = "last " + user + " -F | head -n 1"
+    print(command)
     result = subprocess.run(command, capture_output=True ,shell = True).stdout
     result = clean_bytes(result)
     #Regex fix to remove still logged in and reutrn the current time
