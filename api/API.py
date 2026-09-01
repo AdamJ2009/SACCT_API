@@ -270,7 +270,8 @@ def diskquota(user):
             qutoanet[quota[0]] = quota_json
         return qutoanet
     except:
-        return {}
+        raise
+        #return {}
 
 def time_metrics(name,access_str,last_access,days_back):
     user = "-u " + name + " "
