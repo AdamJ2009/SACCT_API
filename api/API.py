@@ -243,12 +243,14 @@ def get_memeff(base_command,count):
 def diskquota(user):
     try:
         command = "sudo quota -w -u " + user  
-        result = subprocess.run(command, capture_output=True ,shell = True).stdout
+        result = subprocess.run(command, capture_output=True ,shell = True)
         if result.returncode != 0:
             command = "quota -w -u " + user  
-            result = subprocess.run(command, capture_output=True ,shell = True).stdout
+            result = subprocess.run(command, capture_output=True ,shell = True)
         print(command)
-        result = clean_bytes(result)
+        result = clean_bytes(result.stdout)
+        if not result:
+            return {}
         result = result.split('\n')
         result = [' '.join(string.split()) for string in result]
         qutoanet = {}
@@ -270,8 +272,7 @@ def diskquota(user):
             qutoanet[quota[0]] = quota_json
         return qutoanet
     except:
-        raise
-        #return {}
+        return {}
 
 def time_metrics(name,access_str,last_access,days_back):
     user = "-u " + name + " "
