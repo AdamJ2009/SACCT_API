@@ -57,10 +57,14 @@ module SacctApi
 
         def call(**opts)
           result = api_call(opts)
-          return if result.nil? #If no results, do not render anything
+          return if result.nil? # If no results, do not render anything
+
+          # This invokes SacctApi::Renderer.new(result).render
           Renderer.render(result)
-          return if opts[:json].nil? #If not requesting json
-          #Json printout
+
+          return if opts[:json].nil? # If not requesting json
+
+          # Json printout
           json = json_check!(opts[:json])
           File.write(json, JSON.pretty_generate(result))
         end
