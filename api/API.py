@@ -109,7 +109,7 @@ def get_shape(base_command,count):
     }
     shapes = 0
     for i in range(5,len(result),5):
-        if re.search(r"^\d+\.batch$",result[i]):
+        if re.search(r"^\d+\.(batch|0)$",result[i]):
             #node i+1, cpu i+2, task i+3, nodelist i+4
             node += int(result[i+1])
             cpu += int(result[i+2])
