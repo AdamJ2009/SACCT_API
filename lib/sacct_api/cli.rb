@@ -53,7 +53,7 @@ module Sacct_api
           user = opts[:user].nil? ? current_user : opts[:user]
           days = opts[:days].nil? ? 30 : opts[:days]
           result = opts[:timespread] ? timespread(user) : single_time(user,days)
-          unless json.nil?
+          unless opts[:json].nil?
             json = json_check(opts[:json])
             File.write(json,JSON.dump(result))
           end
