@@ -112,7 +112,7 @@ def get_shape(base_command,count):
     last = 0
     for i in range(5,len(result),5):
         current = (result[i].split("."))[0]
-        if re.search(r"^\d+\.(batch|0)$",result[i]) and last != current:
+        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
             last = current
             #node i+1, cpu i+2, task i+3, nodelist i+4
             node += int(result[i+1])
