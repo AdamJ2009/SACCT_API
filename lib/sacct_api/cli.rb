@@ -56,7 +56,7 @@ module SacctApi
         option :json, aliases: ['-j'], type: :string, desc: 'Save json if not none'
 
         def call(**opts)
-          results = api_call(opts)
+          result = api_call(opts)
           Renderer.render(result)
           return if opts[:json].nil?
 
