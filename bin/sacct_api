@@ -4,4 +4,4 @@
 require 'sacct_api'
 require 'dry/cli'
 
-Dry::CLI.new(Sacct_api::CLI::Commands).call
+Dry::CLI.new(SacctApi::CLI::Commands).call

@@ -2,5 +2,5 @@
 
 # Stored version number
 module SacctApi
-  VERSION = '1.0.0' unless defined?(AlcesSacct::VERSION)
+  VERSION = '1.0.0' unless defined?(SacctApi::VERSION)
 end

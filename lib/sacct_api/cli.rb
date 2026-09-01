@@ -95,7 +95,7 @@ module SacctApi
         desc 'Print the version'
 
         def call(*)
-          puts "SacctAPI version #{Sacct_api::VERSION}"
+          puts "SacctAPI version #{SacctApi::VERSION}"
         end
       end
       register 'config set', Config::Set
