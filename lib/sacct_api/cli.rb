@@ -41,7 +41,7 @@ module Sacct_api
         end
 
         def single_time(user,days)
-          cmd = "curl " + get_url + "/" + user + "/" + days.to_s
+          cmd = "curl " + get_url + "/user/" + user + "/" + days.to_s
           puts cmd
           result = `#{cmd}`
           puts result
