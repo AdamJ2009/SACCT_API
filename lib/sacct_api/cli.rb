@@ -23,7 +23,6 @@ module Sacct_api
         def call(**opts)
           user = opts[:user].nil? ? current_user : opts[:user]
           days = opts[:days].nil? ? 30 : opts[:days]
-          puts days
           json = opts[:timespread] ? timespread(user) : single_time(user,days)
         end
 
@@ -40,7 +39,7 @@ module Sacct_api
         end
 
         def single_time(user,days)
-          cmd = "curl " + get_url + "/" + user + "/" + days
+          cmd = "curl " + get_url + "/" + user + "/" + days.to_s
           `#{cmd}`
         end
 
