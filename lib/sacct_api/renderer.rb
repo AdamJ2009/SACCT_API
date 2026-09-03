@@ -52,18 +52,16 @@ module SacctApi
       0
     end
 
-    # Transposes data so headers sit in Column 1 and dynamic records populate adjacent columns
-    def table_render(headers, rows, multiline: false)
-      return if rows.empty?
+    # Flexible table renderer supporting :unicode (outer) and :basic (nested)
+    def table_render(headers, rows, multiline: false, style: :unicode)
+      return '' if rows.empty?
 
       table = TTY::Table.new(header: headers, rows: rows)
 
-      # Disable automatic vertical orientation fallback and enable multiline rendering
       table.render(
-        :unicode, 
+        style, 
         multiline: multiline,
-        resize: true,
-        padding: [0, 1, 0 , 0]
+        padding: [0, 1, 0, 0]
       )
     end
 
@@ -85,7 +83,7 @@ module SacctApi
     end
 
     def job_table
-      headers = ["Days back", "Job Shapes Summary"]
+      headers = ['Days back', 'Job Shapes Summary']
       
       rows = @data[:days_back].map do |fs_path, fs_info|
         [
@@ -94,15 +92,14 @@ module SacctApi
         ]
       end
 
-      # Pass multiline: true so TTY::Table wraps embedded string linebreaks cleanly
-      table_render(headers, rows, multiline: true)
+      table_render(headers, rows, multiline: true, style: :unicode)
     end
 
     def job_table_individual(passed_data)
       shapes = passed_data.dig(:jobs, :shapes)
-      return "-" if shapes.nil? || shapes.empty?
+      return '-' if shapes.nil? || shapes.empty?
 
-      headers = ["Type", "Count", "Avg CPU", "Avg Node", "Avg CPU/Node"]
+      headers = ['Type', 'Count', 'Avg CPU', 'Avg Node', 'Avg CPU/Node']
       
       rows = shapes.map do |fs_path, fs_info|
         [
@@ -114,8 +111,8 @@ module SacctApi
         ]
       end
 
-      # Build the inner sub-table WITHOUT borders to prevent outer table distortion
-      table_render(headers, rows)
+      # Render nested sub-table using :basic style to prevent border wrapping bugs
+      table_render(headers, rows, style: :basic)
     end
 
     def quota_table
