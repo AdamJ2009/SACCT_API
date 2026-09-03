@@ -215,32 +215,50 @@ def time_converter(value):
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
-    command = base_command + ["-P","-o","TotalCPU,Elapsed,AllocCPUS"]
-    print(str(command))
+    command = base_command + ["-P","-o","JobID,TotalCPU,Elapsed,AllocCPUS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
     cpueffsum = 0
-    for i in range(3,len(result),6):
-        try:
-            cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
-        except: 
-            count -= 1
+    for i in range(4,len(result),4):
+        current = (result[i].split("."))[0]
+        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
+            last = current
+            try:
+                cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
+            except: 
+                count -= 1
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
     command = base_command + ["-P","-o","ReqMem,MaxRSS"]
-    print(str(command))
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("|","") #To remove wrong lines
     result = result.replace("\n","|")
     result = result.split("|")
     memeff = 0
-    for i in range(1,len(result),2):
-        try:
-            memeff += convert_mb(result[i+1]) / convert_mb(result[i])
-        except: 
-            count -= 1
+    reqmem = None
+    max_rss = None
+    for i in range(3,len(result),3):
+        current = (result[i].split("."))[0]
+        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
+            last = current
+            if reqmem is None or max_rss is None:
+                count -= 1
+            else:
+                reqmem = None
+                max_rss = None
+        if re.search(r"\d+$",result[i]) and last == current:
+            reqmem = result[i+1]
+        elif re.search(r"\d+\.(batch|0)$",result[i]) and last == current:
+            max_rss = result[i+2]
+        if reqmem is not None or max_rss is not None:
+            try:
+                memeff += convert_mb(max_rss) / convert_mb(reqmem)
+                reqmem = None
+                max_rss = None
+            except: 
+                count -= 1
     return memeff/count, #Will only fail if all metrics fail
 
 def diskquota(user):
