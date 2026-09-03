@@ -234,28 +234,29 @@ def get_cpueff(base_command,count):
 def get_memeff(base_command,count):
     command = base_command + ["-P","-o","JobID,ReqMem,MaxRSS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
-    result = result.replace("|","") #To remove wrong lines
-    result = result.replace("\n","|")
-    result = result.split("|")
+    result = result.replace("\n","!")
+    result = result.split("!")
     memeff = 0
     reqmem = None
     max_rss = None
     last = 0
-    for i in range(3,len(result),3):
+    for i in range(1,len(result)):
         current = (result[i].split("."))[0]
-        print(result[i],result[i+1],result[i+2])
-        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
+        result = result.split("|")
+        print(result[i][0],result[i][1],result[i][2])
+        if re.search(r"\d+\.(batch|0)$",result[i][0]) and last != current:
             last = current
             if reqmem is None or max_rss is None:
                 count -= 1
             else:
                 reqmem = None
                 max_rss = None
-        if re.search(r"\d+$",result[i]) and last == current:
-            reqmem = result[i+1]
-        elif re.search(r"\d+\.(batch|0)$",result[i]) and last == current:
-            max_rss = result[i+2]
+        if re.search(r"\d+$",result[i][0]) and last == current:
+            reqmem = result[i][1]
+        elif re.search(r"\d+\.(batch|0)$",result[i][0]) and last == current:
+            max_rss = result[i][2]
         if reqmem is not None or max_rss is not None:
+            print (reqmem,max_rss)
             try:
                 memeff += convert_mb(max_rss) / convert_mb(reqmem)
                 reqmem = None
