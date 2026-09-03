@@ -14,10 +14,29 @@ module SacctApi
     end
 
     def render
-      quota_table
+      value = check_if_json_ok 
+      value > 0 ? error_handler(value) : table_render
     end
 
     private
+
+    def error_handler(code)
+      errors = ["Error handler failed","API down","HTTPS error","No recent access"]
+      reason = ["The error handler activated when data was ok","There was no valid connection to the API, or the API failed to return data","See HTTPS error","The user did not have any recent acccesses"]
+      if code == 2
+        errors[2] = @data[:Error]
+        reason[2] = @data[:Reason]
+      puts 'Error: ' + errors[code]
+      puts 'Reason: ' + reason[code]
+
+    def table_render
+      quota_table if @data.key?(:quota_filesystem)
+
+    def check_if_json_ok
+      return 1 if data.nil #API down
+      return 2 if data.key?("Error") #Error in request
+      return 3 if data.dig(:last,:submit) =~ /^Not within \d+ days$/ #Did not get any data
+      return 0 #Ok, data exists
 
     def quota_table
       fs_path, fs_info = @data[:quota_filesystem].first
