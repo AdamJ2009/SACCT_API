@@ -244,9 +244,8 @@ def get_memeff(base_command,count):
     last = 0
     count += 1
     for i in range(1,len(result)):
-        current = (result[i].split("."))[0]
-        current = (result[i].split("|"))[0]
         result_l= result[i].split("|")
+        current = (result_l[0].split("."))[0]
         print("cur",current,"req",result_l[1],"max",result_l[2],"con",count)
         if last != current:
             last = current
