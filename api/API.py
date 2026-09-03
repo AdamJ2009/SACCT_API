@@ -180,6 +180,7 @@ def get_partition_list(base_command):
             partitions[result[i]] = 1
         else:
             partitions[result[i]] += 1
+    partitions.pop("", None)
     return partitions
 
 def convert_mb(value):
