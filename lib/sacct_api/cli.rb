@@ -93,8 +93,6 @@ module SacctApi
           request = Net::HTTP::Get.new(uri)
           response = http.request(request)
           JSON.parse(response.body, symbolize_names: true)
-        rescue StandardError
-          nil
         end
 
         def timespread(user)
