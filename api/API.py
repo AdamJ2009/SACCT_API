@@ -249,34 +249,33 @@ def get_memeff(base_command,count):
 def diskquota(user):
     try:
         command = ["sudo", "quota", "-w", "-u", user]
-        result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
-        # Fallback without sudo if needed
-        if result.returncode != 0:
+        completed = subprocess.run(command, capture_output=True, text=True)
+        if completed.returncode != 0:
             command = ["quota", "-w", "-u", user]
-            result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
-        if not result:
+            completed = subprocess.run(command, capture_output=True, text=True)
+        stdout = completed.stdout.strip()
+        if not stdout or completed.returncode != 0:
             return {}
-        result = result.split('\n')
-        result = [' '.join(string.split()) for string in result]
-        qutoanet = {}
-        for i in range(2, len(result)):
-            v_result = result[i]
-            quota = v_result.split(" ")
-            quota_json = { 
-                    "blocks":{
-                        "used_bytes":quota[1],
-                        "quota_bytes":quota[2],
-                        "limit_bytes":quota[3]
-                    },
-                    "files":{
-                        "used":quota[4],
-                        "quota":quota[5],
-                        "limit":quota[6]
-                    }
+        lines = [' '.join(line.split()) for line in stdout.splitlines() if line.strip()]
+        quotanet = {}
+        for line in lines[2:]:
+            quota = line.split(" ")
+            if len(quota) < 7:
+                continue   
+            quotanet[quota[0]] = { 
+                "blocks": {
+                    "used_bytes": quota[1],
+                    "quota_bytes": quota[2],
+                    "limit_bytes": quota[3]
+                },
+                "files": {
+                    "used": quota[4],
+                    "quota": quota[5],
+                    "limit": quota[6]
                 }
-            qutoanet[quota[0]] = quota_json
-        return qutoanet
-    except:
+            }
+        return quotanet
+    except Exception:
         return {}
 
 def time_metrics(name,access_str,last_access,days_back):
