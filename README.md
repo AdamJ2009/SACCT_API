@@ -62,4 +62,39 @@ bundle exec rake install
 bundle exec bin/jobrep
 ```
 
+### Commands
 
+```
+Commands:
+  jobrep config [SUBCOMMAND]
+  jobrep report                            # Report based on flags sent to the cli
+  jobrep version                           # Print the version
+```
+
+#### Config
+
+```
+Commands:
+  jobrep config set            # Save API configuration settings
+  jobrep config show           # Display current API configuration settings
+```
+
+#### Report
+
+```
+Command:
+  jobrep report
+
+Usage:
+  jobrep report
+
+Description:
+  Report based on flags sent to the cli
+
+Options:
+  --days=VALUE, -d VALUE, --date VALUE  # Go back n amount of days
+  --[no-]timespread, -t, --times    # Show 7,30,90 days
+  --user=VALUE, -u VALUE, --username VALUE  # Select user(leave blank for self)
+  --json=VALUE, -j VALUE            # Save json if not none
+  --help, -h                        # Print this help
+```
