@@ -54,12 +54,11 @@ def no_data_json(name,access_str,time = 90):
 
 
 def get_time_submit(base_command):
-    command= base_command + ["-o", "Submit"]
+    command= base_command + ["-o", "Submit","-n"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False)
     lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
     if not lines:
         return "Nothing in last 90 days"
-        
     # Python equivalent of 'tail -n 1'
     last_line = lines[-1]
     return last_line
