@@ -39,8 +39,11 @@ module SacctApi
     end
 
     def render_values
+      puts "Efficency table"
       puts efficiency_table if @data.key?(:days_back)
+      puts "\nJob Shape table"
       puts job_table if @data.key?(:days_back)
+      puts "\nUsage Quota table"
       puts quota_table if @data.key?(:quota_filesystem)
     end
 
@@ -58,9 +61,12 @@ module SacctApi
 
       table = TTY::Table.new(header: headers, rows: rows)
 
+      border_opts = multiline ? { separator: :each_row } : {}
+
       table.render(
         style, 
         multiline: multiline,
+        border: border_opts,
         padding: [0, 1, 0, 0]
       )
     end
