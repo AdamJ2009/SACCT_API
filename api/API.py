@@ -232,7 +232,7 @@ def get_cpueff(base_command,count):
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
-    command = base_command + ["-P","-o","ReqMem,MaxRSS"]
+    command = base_command + ["-P","-o","JobID,ReqMem,MaxRSS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("|","") #To remove wrong lines
     result = result.replace("\n","|")
