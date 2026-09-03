@@ -57,7 +57,6 @@ module SacctApi
 
         def call(**opts)
           result = api_call(opts)
-          return if result.nil? # If no results, do not render anything
 
           # This invokes SacctApi::Renderer.new(result).render
           Renderer.render(result)

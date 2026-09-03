@@ -15,6 +15,7 @@ module SacctApi
 
     def render
       value = check_if_json_ok 
+      puts value
       value > 0 ? error_handler(value) : table_render
     end
 
