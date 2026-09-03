@@ -38,7 +38,7 @@ module SacctApi
 
     def check_if_json_ok
       return 1 if @data.nil? #API down
-      return 2 if @data.key?("Error") #Error in request
+      return 2 if @data.key?(:Error) #Error in request
       return 3 if @data.dig(:last,:submit) =~ /^Not within \d+ days$/ #Did not get any data
       return 0 #Ok, data exists
     end
