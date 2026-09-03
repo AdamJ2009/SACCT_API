@@ -63,7 +63,7 @@ module SacctApi
         :unicode, 
         multiline: multiline,
         resize: true,
-        padding: [0, 1],
+        padding: [0, 1, 0 , 0]
       )
     end
 
