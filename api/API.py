@@ -215,16 +215,21 @@ def time_converter(value):
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
-    command = base_command + ["-X","-P","-o","TotalCPU,Elapsed,AllocCPUS"]
+    command = base_command + ["-P","-o","JobID,TotalCPU,Elapsed,AllocCPUS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
     cpueffsum = 0
-    for i in range(3,len(result),3):
-        try:
-            cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
-        except: 
-            count -= 1
+    last = 0
+    for i in range(4,len(result),4):
+        current = (result[i].split("."))[0]
+        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
+            last = current
+            try:
+                print(result[i+1],result[i+2],result[i+3])
+                cpueffsum += (time_converter(result[i+1]) / ((time_converter(result[i+2])) * int(result[i+3])))
+            except: 
+                count -= 1
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
