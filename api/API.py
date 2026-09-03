@@ -170,7 +170,7 @@ def format_shapes(single,multi,node):
     return shape #will give at least one shape if any job exists
 
 def get_partition_list(base_command):
-    command = base_command + ["-P","-o","Partition"]
+    command = base_command + ["-X","-P","-o","Partition"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
@@ -217,6 +217,7 @@ def time_converter(value):
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
+    base_command.pop(1)
     command = base_command + ["-P","-o","JobID,TotalCPU,Elapsed,AllocCPUS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
