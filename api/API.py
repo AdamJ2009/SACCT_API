@@ -22,9 +22,7 @@ def get_last_user_access_time(user: str) -> str:
     
     # Extract stdout and safely mimic 'head -n 1' in Python
     raw_output = completed_process.stdout
-    first_line = raw_output.splitlines()[0] if raw_output.splitlines() else ""
-    
-    result = clean_bytes(first_line)
+    result = raw_output.splitlines()[0] if raw_output.splitlines() else ""
     
     # Process output
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
