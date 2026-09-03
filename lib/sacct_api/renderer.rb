@@ -55,18 +55,9 @@ module SacctApi
     def table_render(headers, rows)
       return if rows.empty?
 
-      # Transpose rows so metric names form Column 1
-      vertical_rows = headers.each_with_index.map do |header, index|
-        [header] + rows.map { |row| row[index] }
-      end
-
-      # Total columns = 1 (for Metric label) + 1 for each entry in rows
-      # Array.new(rows.size, '') creates the exact number of blank headers needed
-      col_headers = ['Metric'] + Array.new(rows.size, '')
-
       table = TTY::Table.new(
-        header: col_headers,
-        rows: vertical_rows
+        header: headers,
+        rows: rows
       )
 
       puts table.render(:ascii)
