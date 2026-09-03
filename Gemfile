@@ -7,6 +7,8 @@ ruby '~> 4.0.6'
 gem 'csv'
 gem 'dotenv', '~> 3.1'
 gem 'dry-cli', '~> 1.0'
+gem 'net-http'
+gem 'openssl'
 gem 'pry', '~> 0.14', require: false
 gem 'rake', '~> 13.2'
 gem 'rspec', '~> 3.13'
