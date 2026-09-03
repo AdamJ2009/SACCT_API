@@ -72,13 +72,8 @@ module SacctApi
 
       headers = multiple ? ['Days'] + EFFICIENCY_HEADERS : EFFICIENCY_HEADERS
       rows = @data[:days_back].map do |fs_path, fs_info|
-        row = [
-          fs_info.dig(:jobs, :count),
-          fs_info.dig(:jobs, :average_queue),
-          fs_info.dig(:jobs, :average_time),
-          fs_info.dig(:efficiency, :"cpu%"),
-          fs_info.dig(:efficiency, :"mem%")
-        ]
+        row = [fs_info.dig(:jobs, :count), fs_info.dig(:jobs, :average_queue), fs_info.dig(:jobs, :average_time),
+               fs_info.dig(:efficiency, :"cpu%"), fs_info.dig(:efficiency, :"mem%")]
         multiple ? [fs_path.to_s] + row : row
       end
 
@@ -105,11 +100,8 @@ module SacctApi
 
       rows = shapes.map do |fs_path, fs_info|
         [
-          fs_path.to_s,
-          fs_info[:count],
-          fs_info.fetch(:avg_cpu, '-'),
-          fs_info.fetch(:avg_node, '-'),
-          fs_info.fetch(:avg_cpu_per_node, '-')
+          fs_path.to_s, fs_info[:count], fs_info.fetch(:avg_cpu, '-'),
+          fs_info.fetch(:avg_node, '-'), fs_info.fetch(:avg_cpu_per_node, '-')
         ]
       end
 
@@ -120,12 +112,8 @@ module SacctApi
     def quota_table
       rows = @data[:quota_filesystem].map do |fs_path, fs_info|
         [
-          fs_path.to_s,
-          fs_info.dig(:blocks, :used_bytes),
-          fs_info.dig(:blocks, :quota_bytes),
-          fs_info.dig(:blocks, :limit_bytes),
-          fs_info.dig(:files, :used),
-          fs_info.dig(:files, :quota),
+          fs_path.to_s, fs_info.dig(:blocks, :used_bytes), fs_info.dig(:blocks, :quota_bytes),
+          fs_info.dig(:blocks, :limit_bytes), fs_info.dig(:files, :used), fs_info.dig(:files, :quota),
           fs_info.dig(:files, :limit)
         ]
       end
