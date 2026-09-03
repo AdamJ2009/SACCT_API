@@ -246,8 +246,8 @@ def get_memeff(base_command,count):
     for i in range(1,len(result)):
         current = (result[i].split("."))[0]
         result_l= result[i].split("|")
-        print(result_l[0],result_l[1],result_l[2],count)
-        if (re.search(r"\d+\.(batch|0)$",result_l[0]) or re.search(r"\d+$",result_l[0])) and last != current:
+        print(current,result_l[1],result_l[2],count)
+        if last != current:
             last = current
             if reqmem is None or max_rss is None:
                 count -= 1
