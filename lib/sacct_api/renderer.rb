@@ -53,14 +53,18 @@ module SacctApi
     end
 
     # Transposes data so headers sit in Column 1 and dynamic records populate adjacent columns
-    def table_render(headers, rows)
+    def table_render(headers, rows, multiline: false)
       return if rows.empty?
 
-      table = TTY::Table.new(
-        header: headers,
-        rows: rows
+      table = TTY::Table.new(header: headers, rows: rows)
+
+      # Disable automatic vertical orientation fallback and enable multiline rendering
+      puts table.render(
+        :unicode, 
+        multiline: multiline,
+        resize: true,
+        column_widths: [12, 60] # Force explicit column allocation so outer table stays horizontal
       )
-      table.render(:unicode)
     end
 
     def efficiency_table
@@ -81,29 +85,38 @@ module SacctApi
     end
 
     def job_table
-      headers = ["Days back","Sum table"]
-      rows = rows = @data[:days_back].map do |fs_path, fs_info|
+      headers = ["Days back", "Job Shapes Summary"]
+      
+      rows = @data[:days_back].map do |fs_path, fs_info|
         [
           fs_path.to_s,
           job_table_individual(fs_info)
         ]
       end
 
-      table_render(headers, rows)
+      # Pass multiline: true so TTY::Table wraps embedded string linebreaks cleanly
+      table_render(headers, rows, multiline: true)
     end
 
     def job_table_individual(passed_data)
-      headers = ["Type","Count","Average CPU","Average Node","Avg CPU per node"]
-      rows = passed_data.dig(:jobs,:shapes).map do |fs_path, fs_info|
+      shapes = passed_data.dig(:jobs, :shapes)
+      return "-" if shapes.nil? || shapes.empty?
+
+      headers = ["Type", "Count", "Avg CPU", "Avg Node", "Avg CPU/Node"]
+      
+      rows = shapes.map do |fs_path, fs_info|
         [
           fs_path.to_s,
           fs_info[:count],
-          fs_info.key?(:avg_cpu) ? fs_info[:avg_cpu] : '-',
-          fs_info.key?(:avg_node) ? fs_info[:avg_node] : '-',
-          fs_info.key?(:avg_cpu_per_node) ? fs_info[:avg_cpu_per_node] : '-'
+          fs_info.fetch(:avg_cpu, '-'),
+          fs_info.fetch(:avg_node, '-'),
+          fs_info.fetch(:avg_cpu_per_node, '-')
         ]
       end
-      table_render(headers, rows)
+
+      # Build the inner sub-table WITHOUT borders to prevent outer table distortion
+      inner_table = TTY::Table.new(header: headers, rows: rows)
+      inner_table.render(:basic, padding: [0, 1, 0, 0])
     end
 
     def quota_table
