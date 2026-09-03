@@ -8,7 +8,7 @@ git clone <this url>
 cd SACCT_API
 ```
 
-## Run
+## Run the API
 
 ### Virtual machine
 
@@ -19,7 +19,7 @@ source venv/bin/activate
 
 ### Certificate
 
-You need to generate this yourself
+You can generate a certificate yourself, however it does run off adhoc if needed
 
 ```
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
@@ -38,11 +38,28 @@ pip install flask
 pip install pyopenssl
 ```
 
-## Call
+## Call API without CLI
 
+### User only
 ```
 curl -k https://127.0.0.1:5000/user/<user>
 ```
 
+### User and time in days
+```
+curl -k https://127.0.0.1:5000/user/<user>/<days>
+```
+
+## Run the CLI
+### Activate ruby
+```
+bundle install
+bundle exec rake install
+```
+
+## Call the CLI
+```
+bundle exec bin/jobrep
+```
 
 
