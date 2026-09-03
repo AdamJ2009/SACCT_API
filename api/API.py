@@ -236,6 +236,7 @@ def get_memeff(base_command,count):
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     print(result)
     result = result.split("\n")
+    result.pop(-1)
     print(result)
     memeff = 0
     reqmem = None
@@ -243,19 +244,19 @@ def get_memeff(base_command,count):
     last = 0
     for i in range(1,len(result)):
         current = (result[i].split("."))[0]
-        result = result.split("|")
-        print(result[i][0],result[i][1],result[i][2])
-        if re.search(r"\d+\.(batch|0)$",result[i][0]) and last != current:
+        result_l= result[i].split("|")
+        print(result_l[0],result_l[1],result_l[2])
+        if re.search(r"\d+\.(batch|0)$",result_l[0]) and last != current:
             last = current
             if reqmem is None or max_rss is None:
                 count -= 1
             else:
                 reqmem = None
                 max_rss = None
-        if re.search(r"\d+$",result[i][0]) and last == current:
-            reqmem = result[i][1]
-        elif re.search(r"\d+\.(batch|0)$",result[i][0]) and last == current:
-            max_rss = result[i][2]
+        if re.search(r"\d+$",result_l[0]) and last == current:
+            reqmem = result_l[1]
+        elif re.search(r"\d+\.(batch|0)$",result_l[0]) and last == current:
+            max_rss = result_l[2]
         if reqmem is not None or max_rss is not None:
             print (reqmem,max_rss)
             try:
