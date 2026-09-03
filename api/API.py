@@ -220,10 +220,9 @@ def get_cpueff(base_command,count):
     result = result.replace("\n","|")
     result = result.split("|")
     cpueffsum = 0
-    last = 0
     for i in range(3,len(result),3):
         try:
-            cpueffsum += (time_converter(result[i+1]) / ((time_converter(result[i+2])) * int(result[i+3])))
+            cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
         except: 
             count -= 1
     return cpueffsum/count, #Will only fail if all metrics fail
