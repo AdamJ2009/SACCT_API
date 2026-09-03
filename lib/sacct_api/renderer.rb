@@ -26,17 +26,21 @@ module SacctApi
       if code == 2
         errors[2] = @data[:Error]
         reason[2] = @data[:Reason]
+        end
       puts 'Error: ' + errors[code]
       puts 'Reason: ' + reason[code]
+    end
 
     def table_render
       quota_table if @data.key?(:quota_filesystem)
+    end
 
     def check_if_json_ok
       return 1 if data.nil #API down
       return 2 if data.key?("Error") #Error in request
       return 3 if data.dig(:last,:submit) =~ /^Not within \d+ days$/ #Did not get any data
       return 0 #Ok, data exists
+    end
 
     def quota_table
       fs_path, fs_info = @data[:quota_filesystem].first
