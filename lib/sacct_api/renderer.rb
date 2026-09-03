@@ -59,7 +59,7 @@ module SacctApi
       table = TTY::Table.new(header: headers, rows: rows)
 
       # Disable automatic vertical orientation fallback and enable multiline rendering
-      puts table.render(
+      table.render(
         :unicode, 
         multiline: multiline,
         resize: true,
@@ -114,8 +114,7 @@ module SacctApi
       end
 
       # Build the inner sub-table WITHOUT borders to prevent outer table distortion
-      inner_table = TTY::Table.new(header: headers, rows: rows)
-      inner_table.render(:basic, padding: [0, 1, 0, 0])
+      table_render(headers, rows)
     end
 
     def quota_table
