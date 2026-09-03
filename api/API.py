@@ -366,7 +366,8 @@ def get_user_metrics_days(name: str, time:int):
             return not_a_user_json()
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
-            access_str = str(last_access.strftime('%Y-%m-%d'))
+            tomorrow = last_access + datetime.timedelta(days=1)
+            access_str = str(tomorrow .strftime('%Y-%m-%d'))
         start_date = (last_access - datetime.timedelta(days=time)).strftime('%Y-%m-%d')
         base_command = [
             "sacct",
@@ -407,7 +408,8 @@ def get_user_metrics(name: str):
             return not_a_user_json()
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
-            access_str = str(last_access.strftime('%Y-%m-%d'))
+            tomorrow = last_access + datetime.timedelta(days=1)
+            access_str = str(tomorrow .strftime('%Y-%m-%d'))
         start_date = (last_access - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
         base_command = [
             "sacct",
