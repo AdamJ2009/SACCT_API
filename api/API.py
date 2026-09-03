@@ -242,6 +242,7 @@ def get_memeff(base_command,count):
     reqmem = None
     max_rss = None
     last = 0
+    count += 1
     for i in range(1,len(result)):
         current = (result[i].split("."))[0]
         result_l= result[i].split("|")
