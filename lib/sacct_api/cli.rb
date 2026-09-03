@@ -89,10 +89,12 @@ module SacctApi
         def https_request(uri)
           http = Net::HTTP.new(uri.host, uri.port)
           http.use_ssl = true
-          http.verify_mode = url_validate(config)
+          http.verify_mode = url_validate
           request = Net::HTTP::Get.new(uri)
           response = http.request(request)
           JSON.parse(response.body, symbolize_names: true)
+        rescue StandardError
+          nil
         end
 
         def timespread(user)
@@ -108,7 +110,8 @@ module SacctApi
         end
 
 
-        def url_validate(config)
+        def url_validate
+          config = ConfigManager.load
           if config['ssl']
             OpenSSL::SSL::VERIFY_PEER
           else
