@@ -86,12 +86,16 @@ module SacctApi
           cmd = "curl #{url}/user/#{user}"
           raw_response = `#{cmd}`
           JSON.parse(raw_response, symbolize_names: true)
+        rescue
+          nil
         end
 
         def single_time(user, days)
           cmd = "curl #{url}/user/#{user}/#{days}"
           raw_response = `#{cmd}`
           JSON.parse(raw_response, symbolize_names: true)
+        rescue
+          nil
         end
 
         def url
