@@ -98,8 +98,8 @@ module SacctApi
         [
           fs_path.to_s,
           fs_info[:count],
-          fs_info.key?(:avg_cpu) ? fs_info[:avg_cpu] : '-'
-          fs_info.key?(:avg_node) ? fs_info[:avg_node] : '-'
+          fs_info.key?(:avg_cpu) ? fs_info[:avg_cpu] : '-',
+          fs_info.key?(:avg_node) ? fs_info[:avg_node] : '-',
           fs_info.key?(:avg_cpu_per_node) ? fs_info[:avg_cpu_per_node] : '-'
         ]
       end
