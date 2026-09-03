@@ -278,7 +278,7 @@ def diskquota(user):
         return {}
 
 def time_metrics(name,access_str,last_access,days_back):
-    start_date = str(last_access - datetime.timedelta(days=days_back)).strftime('%Y-%m-%d')
+    start_date = (last_access - datetime.timedelta(days=days_back)).strftime('%Y-%m-%d')
     base_command = [
         "sacct",
         "-X",
@@ -345,7 +345,7 @@ def get_user_metrics_days(name: str, time:int):
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
-        start_date = str(last_access - datetime.timedelta(days=time)).strftime('%Y-%m-%d')
+        start_date = (last_access - datetime.timedelta(days=time)).strftime('%Y-%m-%d')
         base_command = [
             "sacct",
             "-X",
