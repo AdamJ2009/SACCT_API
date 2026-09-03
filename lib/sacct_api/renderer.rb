@@ -72,30 +72,42 @@ module SacctApi
     end
 
     def efficiency_table
-      headers = ['Days', 'Job count', 'Queue Time(avg)', 'Run time(Avg)', 'CPU eff', 'Mem Eff']
+      multiple = @data[:days_back].size > 1
+
+      # Conditionally drop 'Days' from the headers
+      headers = ['Job count', 'Queue Time(avg)', 'Run time(Avg)', 'CPU eff', 'Mem Eff']
+      headers.unshift('Days') if multiple
 
       rows = @data[:days_back].map do |fs_path, fs_info|
-        [
-          fs_path.to_s,
+        row = [
           fs_info.dig(:jobs, :count),
           fs_info.dig(:jobs, :average_queue),
           fs_info.dig(:jobs, :average_time),
           fs_info.dig(:efficiency, :"cpu%"),
           fs_info.dig(:efficiency, :"mem%")
         ]
+        # Conditionally prepend the days value if multiple
+        row.unshift(fs_path.to_s) if multiple
+        row
       end
 
       table_render(headers, rows)
     end
 
     def job_table
-      headers = ['Days back', 'Job Shapes Summary']
-      
-      rows = @data[:days_back].map do |fs_path, fs_info|
-        [
-          fs_path.to_s,
-          job_table_individual(fs_info)
-        ]
+      multiple = @data[:days_back].size > 1
+
+      # If single entry, output a 1-column table containing only the sub-table
+      if multiple
+        headers = ['Days back', 'Job Shapes Summary']
+        rows = @data[:days_back].map do |fs_path, fs_info|
+          [fs_path.to_s, job_table_individual(fs_info)]
+        end
+      else
+        headers = ['Job Shapes Summary']
+        rows = @data[:days_back].map do |_fs_path, fs_info|
+          [job_table_individual(fs_info)]
+        end
       end
 
       table_render(headers, rows, multiline: true, style: :unicode)
