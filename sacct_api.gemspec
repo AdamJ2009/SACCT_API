@@ -1,0 +1,33 @@
+# frozen_string_literal: true
+
+require_relative 'lib/sacct_api/version'
+
+Gem::Specification.new do |spec|
+  spec.name        = 'sacct_api'
+  spec.version     = SacctApi::VERSION
+  spec.authors     = ['AdamJ2009']
+  spec.email       = ['adamdj2009@gmail.com']
+
+  spec.summary     = 'CLI tool for returning user json information'
+  spec.description = 'Sacct cli uses flask to make a reliable calling'
+  spec.homepage    = 'https://github.com/AdamJ2009/SACCT_API'
+  spec.required_ruby_version = '>= 3.2.0'
+
+  spec.metadata['homepage_uri']    = spec.homepage
+  spec.metadata['source_code_uri'] = spec.homepage
+
+  gemspec = File.basename(__FILE__)
+  spec.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+    ls.readlines("\x0", chomp: true).reject do |f|
+      (f == gemspec) ||
+        f.start_with?(*%w[Gemfile .gitignore .rubocop.yml spec/]) ||
+        f.end_with?('.csv')
+    end
+  end
+
+  spec.bindir        = 'exe'
+  spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
+  spec.require_paths = ['lib']
+
+  spec.add_dependency 'dry-cli', '~> 1.0'
+end

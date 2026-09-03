@@ -3,24 +3,36 @@ from werkzeug.exceptions import HTTPException
 import subprocess
 import datetime
 import re
+import os
+import sys
 
 app = Flask(__name__)
 
-def clean_bytes(data):
-    return data.decode('utf-8').strip()
-
-def get_last_user_access_time(user):
-    command = "last " + user + " -F | head -n 1"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
-    #Regex fix to remove still logged in and reutrn the current time
+def get_last_user_access_time(user: str) -> str:
+    # Pass arguments safely as a list with shell=False
+    command = ["last", user, "-F"]
+    
+    # Run the command safely without shell execution
+    completed_process = subprocess.run(
+        command, 
+        capture_output=True, 
+        shell=False, 
+        text=True
+    )
+    
+    # Extract stdout and safely mimic 'head -n 1' in Python
+    raw_output = completed_process.stdout
+    result = raw_output.splitlines()[0] if raw_output.splitlines() else ""
+    
+    # Process output
     now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
-    result = re.sub(r"\s+still logged in\s*$",f" - {now}",str(result))
+    result = re.sub(r"\s+still logged in\s*$", f" - {now}", str(result))
     result = str(result).split() 
+    
     if len(result) < 14:
         return "not a user"
-    result = str(result[13] + "-" +  result[10] + "-" +result[11])
-    return result
+        
+    return f"{result[13]}-{result[10]}-{result[11]}"
 
 def not_a_user_json():
     data = {"Error":"Not Found","Reason":"Not a user"}
@@ -42,24 +54,22 @@ def no_data_json(name,access_str,time = 90):
 
 
 def get_time_submit(base_command):
-    try:
-        command = base_command + " -o Submit | tail -n 1"
-        test = subprocess.run(command, capture_output=True ,shell = True).stdout
-        test = clean_bytes(test)
-        test = datetime.datetime.strptime(test, '%Y-%m-%dT%H:%M:%S')
-        return str(test.strftime('%Y-%m-%d'))
-    except:
+    command= base_command + ["-o", "Submit","-n"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False)
+    lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    if not lines:
         return "Nothing in last 90 days"
+    # Python equivalent of 'tail -n 1'
+    last_line = lines[-1]
+    return last_line
 
 def get_count_jobs(base_command):
-    command = base_command + "| wc -l"
-    test = subprocess.run(command, capture_output=True ,shell = True).stdout
-    return clean_bytes(test)
+    result = subprocess.run(base_command, capture_output=True, text=True, shell=False)
+    return len(result.stdout.splitlines())
 
 def get_job_times(base_command,count: int):
-    command = base_command + " -P -o Start,End,Planned"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
+    command = base_command + ["-P", "-o", "Start,End,Planned"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     #Turn into array
     result = result.replace("\n","|")
     result = result.split("|")
@@ -80,10 +90,9 @@ def get_job_times(base_command,count: int):
     return diff/count,queue/count
 
 def get_shape(base_command,count):
-    base_command = base_command.replace("-X","") 
-    command = base_command + " -P -o JobID,NNodes,NCPUS,Ntasks,Nodelist"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
+    base_command.pop(1)
+    command = base_command + ["-P", "-o", "JobID,NNodes,NCPUS,Ntasks,Nodelist"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
     node = 0
@@ -106,8 +115,11 @@ def get_shape(base_command,count):
         "avg_cpu_per_node":0
     }
     shapes = 0
+    last = 0
     for i in range(5,len(result),5):
-        if re.search("^\d+\.batch$",result[i]):
+        current = (result[i].split("."))[0]
+        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
+            last = current
             #node i+1, cpu i+2, task i+3, nodelist i+4
             node += int(result[i+1])
             cpu += int(result[i+2])
@@ -156,9 +168,8 @@ def format_shapes(single,multi,node):
     return shape #will give at least one shape if any job exists
 
 def get_partition_list(base_command):
-    command = base_command + " -P -o Partition"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
+    command = base_command + ["-P","-o","Partition"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
     partitions = {}
@@ -184,18 +195,18 @@ def convert_mb(value):
         return value / (1024*1024)
 
 def time_converter(value):
-    if re.search("^\d+:\d+:\d+$",value):
+    if re.search(r"^\d+:\d+:\d+$",value):
         days = 0
         ms = 0
         time = datetime.datetime.strptime(value, '%H:%M:%S')
     #d-h:m:s
-    elif re.search("^\d+-\d+:\d+:\d+$",value):
+    elif re.search(r"^\d+-\d+:\d+:\d+$",value):
         value = value.split("-")
         days = int(value[0])
         ms = 0
         time = datetime.datetime.strptime(value[1], '%H:%M:%S')
     #m:s.ms
-    elif re.search("^\d+:\d+.\d+$",value):
+    elif re.search(r"^\d+:\d+.\d+$",value):
         value = value.split(".")
         days = 0
         ms = int(value[1])
@@ -204,10 +215,9 @@ def time_converter(value):
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
-    base_command = base_command.replace("-X","") #Needed to fix to give totalCPU where possible
-    command = base_command + " -P -o TotalCPU,Elapsed,AllocCPUS"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
+    base_command.pop(1)
+    command = base_command + ["-P","-o","TotalCPU,Elapsed,AllocCPUS"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
     cpueffsum = 0
@@ -219,10 +229,9 @@ def get_cpueff(base_command,count):
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
-    base_command = base_command.replace("-X","") #Needed to fix to give memeff where possible
-    command = base_command + " -P -o ReqMem,MaxRSS"
-    result = subprocess.run(command, capture_output=True ,shell = True).stdout
-    result = clean_bytes(result)
+    base_command.pop(1)
+    command = base_command + ["-P","-o","ReqMem,MaxRSS"]
+    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("|","") #To remove wrong lines
     result = result.replace("\n","|")
     result = result.split("|")
@@ -236,37 +245,45 @@ def get_memeff(base_command,count):
 
 def diskquota(user):
     try:
-        command = "quota -w -u " + user  
-        result = subprocess.run(command, capture_output=True ,shell = True).stdout
-        result = clean_bytes(result)
-        result = result.split('\n')
-        result = [' '.join(string.split()) for string in result]
-        qutoanet = {}
-        for i in range(2, len(result)):
-            v_result = result[i]
-            quota = v_result.split(" ")
-            quota_json = { 
-                    "blocks":{
-                        "used_bytes":quota[1],
-                        "quota_bytes":quota[2],
-                        "limit_bytes":quota[3]
-                    },
-                    "files":{
-                        "used":quota[4],
-                        "quota":quota[5],
-                        "limit":quota[6]
-                    }
+        command = ["sudo", "quota", "-w", "-u", user]
+        completed = subprocess.run(command, capture_output=True, text=True)
+        if completed.returncode != 0:
+            command = ["quota", "-w", "-u", user]
+            completed = subprocess.run(command, capture_output=True, text=True)
+        stdout = completed.stdout.strip()
+        if not stdout or completed.returncode != 0:
+            return {}
+        lines = [' '.join(line.split()) for line in stdout.splitlines() if line.strip()]
+        quotanet = {}
+        for line in lines[2:]:
+            quota = line.split(" ")
+            if len(quota) < 7:
+                continue   
+            quotanet[quota[0]] = { 
+                "blocks": {
+                    "used_bytes": quota[1],
+                    "quota_bytes": quota[2],
+                    "limit_bytes": quota[3]
+                },
+                "files": {
+                    "used": quota[4],
+                    "quota": quota[5],
+                    "limit": quota[6]
                 }
-            qutoanet[quota[0]] = quota_json
-        return qutoanet
-    except:
+            }
+        return quotanet
+    except Exception:
         return {}
 
 def time_metrics(name,access_str,last_access,days_back):
-    user = "-u " + name + " "
-    end =  "-E " + access_str 
-    start  = "-S " + str((last_access - datetime.timedelta(days = days_back)).strftime('%Y-%m-%d')) + " " #90 days forced limit
-    base_command = "sacct -X " + user + start + end
+    start_date = (last_access - datetime.timedelta(days=days_back)).strftime('%Y-%m-%d')
+    base_command = [
+        "sacct",
+        "-X",
+        "-u", name,
+        "-S", start_date,
+        "-E", access_str
+    ]
     submit_time = get_time_submit(base_command)
     if submit_time == "Nothing in last 90 days":
         return "none"
@@ -309,17 +326,31 @@ def time_metrics(name,access_str,last_access,days_back):
 
 @app.route('/user/<string:name>/<int:time>',methods=['GET'])
 def get_user_metrics_days(name: str, time:int):
-    if request.method == 'GET':
+    epoch_start = datetime.date(1970, 1, 1)
+    today = datetime.date.today()
+    max_days = (today - epoch_start).days
+    if time < 0 or time > max_days:
+        response = jsonify({
+            "Error": "Bad Request",
+            "Reason": f"Invalid Time:Time must be between 0 and {max_days} days."
+        })
+        response.status_code = 400
+        return response
+    elif request.method == 'GET':
         last_access = get_last_user_access_time(name) #Check if the user has ever accessed this cluster
         if last_access == "not a user": 
             return not_a_user_json()
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
-        user = "-u " + name + " "
-        end =  "-E " + access_str 
-        start  = "-S " + str((last_access - datetime.timedelta(days = time)).strftime('%Y-%m-%d')) + " " #Any single time
-        base_command = "sacct -X " + user + start + end
+        start_date = (last_access - datetime.timedelta(days=time)).strftime('%Y-%m-%d')
+        base_command = [
+            "sacct",
+            "-X",
+            "-u", name,
+            "-S", start_date,
+            "-E", access_str
+        ]
         submit_time = get_time_submit(base_command)
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str,time)
@@ -353,10 +384,14 @@ def get_user_metrics(name: str):
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
-        user = "-u " + name + " "
-        end =  "-E " + access_str 
-        start  = "-S " + str((last_access - datetime.timedelta(days = 90)).strftime('%Y-%m-%d')) + " " #90 days forced limit
-        base_command = "sacct -X " + user + start + end
+        start_date = (last_access - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
+        base_command = [
+            "sacct",
+            "-X",
+            "-u", name,
+            "-S", start_date,
+            "-E", access_str
+        ]
         submit_time = get_time_submit(base_command)
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str)
@@ -405,9 +440,31 @@ def handle_exception(e):
     return response
     
 
-if __name__ == "__main__":
-    try:
-        app.run(ssl_context=('cert.pem', 'key.pem'))
-    except FileNotFoundError:
+def main():
+    cert_file = 'cert.pem'
+    key_file = 'key.pem'
+
+    # Check for certificates before starting the socket
+    if os.path.exists(cert_file) and os.path.exists(key_file):
+        ssl_ctx = (cert_file, key_file)
+        print("Starting server with custom SSL certificates...")
+    else:
         print("No certificate found, running with adhoc, do not deploy with adhoc")
-        app.run(ssl_context="adhoc")
+        ssl_ctx = 'adhoc'
+
+    try:
+        app.run(
+            port=5000,
+            ssl_context=ssl_ctx,
+        )
+    except KeyboardInterrupt:
+        print("\nShutting down server gracefully...")
+        sys.exit(0)
+    except OSError as e:
+        if "Address already in use" in str(e):
+            print("\n[Error] Port 5000 is already in use. Run 'pkill -f API.py' or pick another port.")
+        else:
+            raise e
+
+if __name__ == '__main__':
+    main()
