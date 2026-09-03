@@ -5,6 +5,9 @@ require 'date'
 require 'dry/cli'
 require 'fileutils'
 require 'json'
+require 'net/http'
+require 'openssl'
+require 'uri'
 require 'yaml'
 
 require_relative 'version'
@@ -73,7 +76,8 @@ module SacctApi
         def api_call(opts)
           user = opts[:user].nil? ? current_user : opts[:user]
           days = opts[:days].nil? ? 30 : opts[:days]
-          opts[:timespread] ? timespread(user) : single_time(user, days)
+          uri = opts[:timespread] ? timespread(user) : single_time(user, days)
+          https_request(uri)
         end
 
         def current_user
@@ -82,27 +86,36 @@ module SacctApi
           ENV['USER']
         end
 
-        def timespread(user)
-          cmd = "curl #{url}/user/#{user}"
-          raw_response = `#{cmd}`
-          JSON.parse(raw_response, symbolize_names: true)
+        def https_request(uri)
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = true
+          http.verify_mode = url_validate(config)
+          request = Net::HTTP::Get.new(uri)
+          response = http.request(request)
+          JSON.parse(response.body, symbolize_names: true)
         rescue StandardError
           nil
+        end
+
+        def timespread(user)
+          config = ConfigManager.load
+          url = config['url']
+          URI.parse("#{url}/user/#{user}")
         end
 
         def single_time(user, days)
-          cmd = "curl #{url}/user/#{user}/#{days}"
-          raw_response = `#{cmd}`
-          JSON.parse(raw_response, symbolize_names: true)
-        rescue StandardError
-          nil
-        end
-
-        def url
           config = ConfigManager.load
           url = config['url']
-          ssl = config['ssl'] ? '' : '-k '
-          ssl + url
+          URI.parse("#{url}/user/#{user}/#{days}")
+        end
+
+
+        def url_validate(config)
+          if config['ssl']
+            OpenSSL::SSL::VERIFY_PEER
+          else
+            OpenSSL::SSL::VERIFY_NONE
+          end
         end
 
         def json_check!(filename)
