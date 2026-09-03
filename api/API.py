@@ -386,7 +386,7 @@ def get_user_metrics(name: str):
         else:
             last_access = datetime.datetime.strptime(last_access, '%Y-%b-%d')
             access_str = str(last_access.strftime('%Y-%m-%d'))
-        start_date = str(last_access - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
+        start_date = (last_access - datetime.timedelta(days=90)).strftime('%Y-%m-%d')
         base_command = [
             "sacct",
             "-X",
