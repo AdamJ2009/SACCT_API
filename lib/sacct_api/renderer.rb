@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
 require 'tty-table'
+require_relative 'error_handler'
 
 module SacctApi
   # TTY table renderer
   class Renderer
+    EFFICIENCY_HEADERS = ['Job count', 'Queue Time(avg)', 'Run time(Avg)', 'CPU eff', 'Mem Eff'].freeze
+    SHAPE_HEADERS = ['Type', 'Count', 'Avg CPU', 'Avg Node', 'Avg CPU/Node'].freeze
+    QUOTA_HEADERS = ['Filesystem', 'Used Bytes', 'Quota Bytes', 'Limit Bytes', 'Used Files', 'Quota Files',
+                     'Limit Files'].freeze
+
     def initialize(data)
       @data = data
     end
@@ -15,36 +21,23 @@ module SacctApi
 
     def render
       value = check_if_json_ok
-      value > 0 ? error_handler(value) : render_values
+      value.positive? ? ErrorHandler.print(value, @data) : render_values
     end
 
     private
 
-    def error_handler(code)
-      errors = ['Error handler failed', 'API down', 'HTTPS error', 'No recent access']
-      reasons = [
-        'The error handler activated when data was ok',
-        'There was no valid connection to the API, or the API failed to return data',
-        'See HTTPS error',
-        'The user did not have any recent accesses'
-      ]
-
-      if code == 2
-        errors[2] = @data[:Error]
-        reasons[2] = @data[:Reason]
+    def render_values
+      if @data.key?(:days_back)
+        puts efficiency_table
+        puts "\n"
+        puts job_table
+        puts "\n"
       end
 
-      puts "Error: #{errors[code]}"
-      puts "Reason: #{reasons[code]}"
-    end
+      return unless @data.key?(:quota_filesystem)
 
-    def render_values
-      puts "Efficency table"
-      puts efficiency_table if @data.key?(:days_back)
-      puts "\nJob Shape table"
-      puts job_table if @data.key?(:days_back)
-      puts "\nUsage Quota table"
-      puts quota_table if @data.key?(:quota_filesystem)
+      puts 'Usage Quota table'
+      puts quota_table
     end
 
     def check_if_json_ok
@@ -55,29 +48,29 @@ module SacctApi
       0
     end
 
-    # Flexible table renderer supporting :unicode (outer) and :basic (nested)
+    def title(table, multiple)
+      if multiple
+        puts "#{table} table over range"
+      else
+        days = @data[:days_back].keys.first
+        puts "#{table} table for #{days} days"
+      end
+    end
+
     def table_render(headers, rows, multiline: false, style: :unicode)
       return '' if rows.empty?
 
       table = TTY::Table.new(header: headers, rows: rows)
-
       border_opts = multiline ? { separator: :each_row } : {}
 
-      table.render(
-        style, 
-        multiline: multiline,
-        border: border_opts,
-        padding: [0, 1, 0, 0]
-      )
+      table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
     end
 
     def efficiency_table
       multiple = @data[:days_back].size > 1
+      title('Efficency', multiple)
 
-      # Conditionally drop 'Days' from the headers
-      headers = ['Job count', 'Queue Time(avg)', 'Run time(Avg)', 'CPU eff', 'Mem Eff']
-      headers.unshift('Days') if multiple
-
+      headers = multiple ? ['Days'] + EFFICIENCY_HEADERS : EFFICIENCY_HEADERS
       rows = @data[:days_back].map do |fs_path, fs_info|
         row = [
           fs_info.dig(:jobs, :count),
@@ -86,9 +79,7 @@ module SacctApi
           fs_info.dig(:efficiency, :"cpu%"),
           fs_info.dig(:efficiency, :"mem%")
         ]
-        # Conditionally prepend the days value if multiple
-        row.unshift(fs_path.to_s) if multiple
-        row
+        multiple ? [fs_path.to_s] + row : row
       end
 
       table_render(headers, rows)
@@ -96,29 +87,22 @@ module SacctApi
 
     def job_table
       multiple = @data[:days_back].size > 1
+      title('Job Shape', multiple)
 
-      # If single entry, output a 1-column table containing only the sub-table
       if multiple
         headers = ['Days back', 'Job Shapes Summary']
-        rows = @data[:days_back].map do |fs_path, fs_info|
-          [fs_path.to_s, job_table_individual(fs_info)]
-        end
+        rows = @data[:days_back].map { |path, info| [path.to_s, job_table_individual(info, false)] }
+        table_render(headers, rows, multiline: true, style: :unicode)
       else
-        headers = ['Job Shapes Summary']
-        rows = @data[:days_back].map do |_fs_path, fs_info|
-          [job_table_individual(fs_info)]
-        end
+        fs_info = @data[:days_back].values.first
+        job_table_individual(fs_info, true)
       end
-
-      table_render(headers, rows, multiline: true, style: :unicode)
     end
 
-    def job_table_individual(passed_data)
+    def job_table_individual(passed_data, single)
       shapes = passed_data.dig(:jobs, :shapes)
       return '-' if shapes.nil? || shapes.empty?
 
-      headers = ['Type', 'Count', 'Avg CPU', 'Avg Node', 'Avg CPU/Node']
-      
       rows = shapes.map do |fs_path, fs_info|
         [
           fs_path.to_s,
@@ -129,13 +113,11 @@ module SacctApi
         ]
       end
 
-      # Render nested sub-table using :basic style to prevent border wrapping bugs
-      table_render(headers, rows, style: :basic)
+      style = single ? :unicode : :basic
+      table_render(SHAPE_HEADERS, rows, style: style)
     end
 
     def quota_table
-      headers = ['Filesystem', 'Used Bytes', 'Quota Bytes', 'Limit Bytes', 'Used Files', 'Quota Files', 'Limit Files']
-
       rows = @data[:quota_filesystem].map do |fs_path, fs_info|
         [
           fs_path.to_s,
@@ -148,7 +130,7 @@ module SacctApi
         ]
       end
 
-      table_render(headers, rows)
+      table_render(QUOTA_HEADERS, rows)
     end
   end
 end

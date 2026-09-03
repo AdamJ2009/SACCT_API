@@ -86,7 +86,7 @@ module SacctApi
           cmd = "curl #{url}/user/#{user}"
           raw_response = `#{cmd}`
           JSON.parse(raw_response, symbolize_names: true)
-        rescue
+        rescue StandardError
           nil
         end
 
@@ -94,7 +94,7 @@ module SacctApi
           cmd = "curl #{url}/user/#{user}/#{days}"
           raw_response = `#{cmd}`
           JSON.parse(raw_response, symbolize_names: true)
-        rescue
+        rescue StandardError
           nil
         end
 
