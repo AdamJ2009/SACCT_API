@@ -257,7 +257,7 @@ def get_memeff(base_command,count):
             reqmem = result_l[1]
         elif re.search(r"\d+\.(batch|0)$",result_l[0]) and last == current:
             max_rss = result_l[2]
-        if reqmem is not None or max_rss is not None:
+        if reqmem is not None and max_rss is not None:
             print (reqmem,max_rss)
             try:
                 memeff += convert_mb(max_rss) / convert_mb(reqmem)
