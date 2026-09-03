@@ -39,8 +39,9 @@ module SacctApi
     end
 
     def render_values
-      efficiency_table if @data.key?(:days_back)
-      quota_table if @data.key?(:quota_filesystem)
+      puts efficiency_table if @data.key?(:days_back)
+      puts job_table if @data.key?(:days_back)
+      puts quota_table if @data.key?(:quota_filesystem)
     end
 
     def check_if_json_ok
@@ -59,9 +60,7 @@ module SacctApi
         header: headers,
         rows: rows
       )
-
-      puts table.render(:unicode)
-      puts "\n"
+      table.render(:unicode)
     end
 
     def efficiency_table
@@ -80,6 +79,29 @@ module SacctApi
 
       table_render(headers, rows)
     end
+
+    def job_table
+      headers = ["Days back","Sum table"]
+      rows = rows = @data[:days_back].map do |fs_path, fs_info|
+        [
+          fs_path.to_s,
+          job_table_individual(fs_info)
+      ]
+
+      table_render(headers, rows)
+
+    def job_table_individual(passed_data)
+      headers = ["Type","Count","Average CPU","Average Node","Avg CPU per node"]
+      rows = passed_data.dig(:jobs,:shapes).map do |fs_path, fs_info|
+        [
+          fs_path.to_s,
+          fs_info[:count],
+          fs_info.key?(:avg_cpu) ? fs_info[:avg_cpu] : '-'
+          fs_info.key?(:avg_node) ? fs_info[:avg_node] : '-'
+          fs_info.key?(:avg_cpu_per_node) ? fs_info[:avg_cpu_per_node] : '-'
+        ]
+        table_render(headers, rows)
+      return 
 
     def quota_table
       headers = ['Filesystem', 'Used Bytes', 'Quota Bytes', 'Limit Bytes', 'Used Files', 'Quota Files', 'Limit Files']
