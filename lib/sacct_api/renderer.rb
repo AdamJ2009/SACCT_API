@@ -60,7 +60,7 @@ module SacctApi
         rows: rows
       )
 
-      puts table.render(:ascii)
+      puts table.render(:unicode)
       puts "\n"
     end
 
