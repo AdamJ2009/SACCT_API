@@ -89,69 +89,144 @@ def get_job_times(base_command,count: int):
             count -= 1
     return diff/count,queue/count
 
-def get_shape(base_command,count):
-    base_command.pop(1)
-    command = base_command + ["-P", "-o", "JobID,NNodes,NCPUS,Ntasks,Nodelist"]
-    result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
-    result = result.replace("\n","|")
-    result = result.split("|")
+def get_shape(base_command, count):
+    # Prepare command
+    cmd = list(base_command)
+    if len(cmd) > 1:
+        cmd.pop(1)
+    command = cmd + ["-P", "-o", "JobID,NNodes,NCPUS,Ntasks,Nodelist"]
+
+    result = subprocess.run(
+        command, capture_output=True, text=True, shell=False
+    ).stdout
+
+    lines = [line.strip() for line in result.splitlines() if line.strip()]
+    if not lines or len(lines) <= 1:
+        return 0, 0, 0, {}, {}, {"count": 0}, {"count": 0, "avg_cpu": 0}, {}
+
+    # Group all rows by base Job ID
+    job_groups = {}
+    for line in lines[1:]:  # Skip header
+        parts = line.split("|")
+        if len(parts) < 5:
+            continue
+
+        job_id_str, nodes, cpus, tasks, nodelist = parts[:5]
+        base_id = job_id_str.split(".")[0]
+
+        try:
+            n_nodes = int(nodes)
+            n_cpus = int(cpus)
+            n_tasks = int(tasks)
+        except ValueError:
+            continue
+
+        entry = {
+            "job_id": job_id_str,
+            "nodes": n_nodes,
+            "cpus": n_cpus,
+            "tasks": n_tasks,
+            "nodelist": nodelist,
+        }
+
+        if base_id not in job_groups:
+            job_groups[base_id] = []
+        job_groups[base_id].append(entry)
+
+    # Initialize aggregators
     node = 0
-    cpu = 0 
+    cpu = 0
     task = 0
-    nodelist = {}
+    nodelist_dict = {}
     shape_ver = {}
     shapelist = {}
-    single_core = {
-        "count":0
-    }
-    multi_core = {
-        "count":0,
-        "avg_cpu":0
-    }
+    single_core = {"count": 0}
+    multi_core = {"count": 0, "avg_cpu": 0}
     multi_node = {
         "count": 0,
-        "avg_cpu":0,
-        "avg_node":0,
-        "avg_cpu_per_node":0
+        "avg_cpu": 0,
+        "avg_node": 0,
+        "avg_cpu_per_node": 0,
     }
     shapes = 0
-    last = 0
-    for i in range(5,len(result),5):
-        current = (result[i].split("."))[0]
-        if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
-            last = current
-            #node i+1, cpu i+2, task i+3, nodelist i+4
-            node += int(result[i+1])
-            cpu += int(result[i+2])
-            task += int(result[i+3])
-            if result[i+3] not in nodelist:
-                nodelist[result[i+4]] = 1
-            else:
-                nodelist[result[i+4]] += 1
-            text_shape = str(result[i+1])+"|"+str(result[i+2])+"|"+str(result[i+3])+"|"+(str(result[i+4]))
-            if text_shape not in shape_ver:
-                shape_ver[text_shape] = shapes
-                shapelist[shapes] = {}
-                shapelist[shapes]["count"] = 1
-                shapelist[shapes]["nodes"] = int(result[i+1])
-                shapelist[shapes]["cpu"] = int(result[i+2])
-                shapelist[shapes]["task"] = int(result[i+3])
-                shapelist[shapes]["nodelist"] = result[i+4]
-                shapes += 1
-            else:
-                v = shape_ver[text_shape]
-                shapelist[v]["count"] += 1
-            if int(result[i+1]) == 1 and int(result[i+2]) == 1:
-                single_core["count"] +=1
-            elif int(result[i+2])>  1 and int(result[i+1]) == 1:
-                multi_core['count'] += 1
-                multi_core["avg_cpu"] += int(result[i+2])
-            elif int(result[i+1]) > 1:
-                multi_node['count'] += 1
-                multi_node["avg_cpu"] += int(result[i+2])
-                multi_node["avg_node"] + int(result[i+1])
-                multi_node["avg_cpu_per_node"] += int(result[i+2]) / int(result[i+1])
-    return node/count,cpu/count,task/count,nodelist,shapelist,single_core,multi_core,multi_node
+
+    # Select the record with highest node count per job
+    for base_id, records in job_groups.items():
+        # Filter for .batch or .0 records preferred, but fall back to all if none matched
+        batch_or_zero = [
+            r for r in records if re.search(r"\.(batch|0)$", r["job_id"])
+        ]
+        candidates = batch_or_zero if batch_or_zero else records
+
+        # Pick the candidate with the MAXIMUM nodes
+        best_record = max(candidates, key=lambda x: x["nodes"])
+
+        r_nodes = best_record["nodes"]
+        r_cpus = best_record["cpus"]
+        r_tasks = best_record["tasks"]
+        r_nodelist = best_record["nodelist"]
+
+        node += r_nodes
+        cpu += r_cpus
+        task += r_tasks
+
+        # Update Nodelist frequency
+        nodelist_dict[r_nodelist] = nodelist_dict.get(r_nodelist, 0) + 1
+
+        # Track unique shapes
+        text_shape = f"{r_nodes}|{r_cpus}|{r_tasks}|{r_nodelist}"
+        if text_shape not in shape_ver:
+            shape_ver[text_shape] = shapes
+            shapelist[shapes] = {
+                "count": 1,
+                "nodes": r_nodes,
+                "cpu": r_cpus,
+                "task": r_tasks,
+                "nodelist": r_nodelist,
+            }
+            shapes += 1
+        else:
+            v = shape_ver[text_shape]
+            shapelist[v]["count"] += 1
+
+        # Classify job type
+        if r_nodes == 1 and r_cpus == 1:
+            single_core["count"] += 1
+        elif r_nodes == 1 and r_cpus > 1:
+            multi_core["count"] += 1
+            multi_core["avg_cpu"] += r_cpus
+        elif r_nodes > 1:
+            multi_node["count"] += 1
+            multi_node["avg_cpu"] += r_cpus
+            multi_node["avg_node"] += r_nodes  # Fixed bug: was missing '='
+            multi_node["avg_cpu_per_node"] += r_cpus / r_nodes
+
+    # Calculate averages across counts
+    if count > 0:
+        avg_node = node / count
+        avg_cpu = cpu / count
+        avg_task = task / count
+    else:
+        avg_node = avg_cpu = avg_task = 0
+
+    if multi_core["count"] > 0:
+        multi_core["avg_cpu"] /= multi_core["count"]
+
+    if multi_node["count"] > 0:
+        multi_node["avg_cpu"] /= multi_node["count"]
+        multi_node["avg_node"] /= multi_node["count"]
+        multi_node["avg_cpu_per_node"] /= multi_node["count"]
+
+    return (
+        avg_node,
+        avg_cpu,
+        avg_task,
+        nodelist_dict,
+        shapelist,
+        single_core,
+        multi_core,
+        multi_node,
+    )
 
 def format_shapes(single,multi,node):
     shape = {}
