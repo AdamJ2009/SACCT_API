@@ -86,9 +86,11 @@ module SacctApi
         [
           fs_path.to_s,
           job_table_individual(fs_info)
-      ]
+        ]
+      end
 
       table_render(headers, rows)
+    end
 
     def job_table_individual(passed_data)
       headers = ["Type","Count","Average CPU","Average Node","Avg CPU per node"]
@@ -100,8 +102,9 @@ module SacctApi
           fs_info.key?(:avg_node) ? fs_info[:avg_node] : '-'
           fs_info.key?(:avg_cpu_per_node) ? fs_info[:avg_cpu_per_node] : '-'
         ]
-        table_render(headers, rows)
-      return 
+      end
+      table_render(headers, rows)
+    end
 
     def quota_table
       headers = ['Filesystem', 'Used Bytes', 'Quota Bytes', 'Limit Bytes', 'Used Files', 'Quota Files', 'Limit Files']
