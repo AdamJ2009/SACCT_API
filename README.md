@@ -71,12 +71,29 @@ Commands:
   jobrep version                           # Print the version
 ```
 
-#### Config
+#### Config main
 
 ```
 Commands:
   jobrep config set            # Save API configuration settings
   jobrep config show           # Display current API configuration settings
+```
+
+#### Config set
+```
+Command:
+  jobrep config set
+
+Usage:
+  jobrep config set
+
+Description:
+  Save API configuration settings
+
+Options:
+  --url=VALUE, -u VALUE             # API base URL
+  --[no-]ssl                        # Verify SSL certificate
+  --help, -h                        # Print this help
 ```
 
 #### Report
