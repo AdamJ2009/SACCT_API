@@ -225,7 +225,7 @@ def get_cpueff(base_command,count):
         if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
             last = current
             try:
-                cpueffsum += (time_converter(result[i]) / ((time_converter(result[i+1])) * int(result[i+2])))
+                cpueffsum += (time_converter(result[i+1]) / ((time_converter(result[i+2])) * int(result[i+3])))
             except: 
                 count -= 1
     return cpueffsum/count, #Will only fail if all metrics fail
