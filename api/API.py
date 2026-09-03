@@ -255,8 +255,12 @@ def get_memeff(base_command,count):
             max_rss = None
         if re.search(r"\d+$",result_l[0]) and last == current:
             reqmem = result_l[1]
+            if reqmem == "":
+                max_rss = None
         elif re.search(r"\d+\.(batch|0)$",result_l[0]) and last == current:
             max_rss = result_l[2]
+            if max_rss == "":
+                max_rss = None
         if reqmem is not None and max_rss is not None:
             print (reqmem,max_rss)
             try:
