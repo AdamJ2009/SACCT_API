@@ -226,7 +226,6 @@ def get_cpueff(base_command,count):
         if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
             last = current
             try:
-                print(result[i+1],result[i+2],result[i+3])
                 cpueffsum += (time_converter(result[i+1]) / ((time_converter(result[i+2])) * int(result[i+3])))
             except: 
                 count -= 1
@@ -244,6 +243,7 @@ def get_memeff(base_command,count):
     last = 0
     for i in range(3,len(result),3):
         current = (result[i].split("."))[0]
+        print(result[i],result[i+1],result[i+2])
         if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
             last = current
             if reqmem is None or max_rss is None:
