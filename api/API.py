@@ -234,10 +234,8 @@ def get_cpueff(base_command,count):
 def get_memeff(base_command,count):
     command = base_command + ["-P","-o","JobID,ReqMem,MaxRSS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
-    print(result)
     result = result.split("\n")
     result.pop(-1)
-    print(result)
     memeff = 0
     reqmem = None
     max_rss = None
@@ -246,7 +244,6 @@ def get_memeff(base_command,count):
     for i in range(1,len(result)):
         result_l= result[i].split("|")
         current = (result_l[0].split("."))[0]
-        print("cur",current,"req",result_l[1],"max",result_l[2],"con",count)
         if last != current:
             last = current
             if reqmem is None or max_rss is None:
@@ -262,14 +259,12 @@ def get_memeff(base_command,count):
             if max_rss == "":
                 max_rss = None
         if reqmem is not None and max_rss is not None:
-            print (reqmem,max_rss)
             try:
                 memeff += convert_mb(max_rss) / convert_mb(reqmem)
                 reqmem = None
                 max_rss = None
             except: 
                 count -= 1
-    print(count)
     return memeff/count, #Will only fail if all metrics fail
 
 def diskquota(user):
