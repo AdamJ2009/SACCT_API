@@ -63,7 +63,6 @@ module SacctApi
         :unicode, 
         multiline: multiline,
         resize: true,
-        column_widths: [12, 60] # Force explicit column allocation so outer table stays horizontal
       )
     end
 
