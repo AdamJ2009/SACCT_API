@@ -151,7 +151,7 @@ def get_shape(base_command,count):
             elif int(result[i+1]) > 1:
                 multi_node['count'] += 1
                 multi_node["avg_cpu"] += int(result[i+2])
-                multi_node["avg_node"] + int(result[i+1])
+                multi_node["avg_node"] += int(result[i+1])
                 multi_node["avg_cpu_per_node"] += int(result[i+2]) / int(result[i+1])
     return node/count,cpu/count,task/count,nodelist,shapelist,single_core,multi_core,multi_node
 
