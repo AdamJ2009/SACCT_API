@@ -265,6 +265,7 @@ def get_memeff(base_command,count):
                 max_rss = None
             except: 
                 count -= 1
+    print(count)
     return memeff/count, #Will only fail if all metrics fail
 
 def diskquota(user):
