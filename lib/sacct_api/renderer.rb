@@ -29,9 +29,9 @@ module SacctApi
     def render_values
       puts efficiency_table, job_table if valid_data?
       quota = @data[:quota_filesystem] || @data['quota_filesystem']
-      return if quota.nil? || quota == 'none'
+      return if quota.nil? || quota == 'None'
 
-      puts quota_table
+      puts 'Usage Quota table', quota_table
     end
 
     def valid_data?
@@ -54,8 +54,7 @@ module SacctApi
     end
 
     def title(table, multiple)
-      msg = multiple ? "#{table} table over range" : "#{table} table for #{@data[:days_back].keys.first} days"
-      puts msg
+      puts multiple ? "#{table} table over range" : "#{table} table for #{@data[:days_back].keys.first} days"
     end
 
     def table_render(headers, rows, multiline: false, style: :unicode)
@@ -63,9 +62,7 @@ module SacctApi
 
       table = TTY::Table.new(header: headers, rows: rows)
       border_opts = multiline ? { separator: :each_row } : {}
-
-      puts table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
-      puts "\n"
+      table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
     end
 
     def efficiency_table
@@ -79,7 +76,7 @@ module SacctApi
         multiple ? [fs_path.to_s] + row : row
       end
 
-      table_render(headers, rows)
+      "#{table_render(headers, rows)}\n\n"
     end
 
     def job_table
@@ -89,9 +86,9 @@ module SacctApi
       if multiple
         headers = ['Days back', 'Job Shapes Summary']
         rows = @data[:days_back].map { |path, info| [path.to_s, job_table_individual(info, false)] }
-        table_render(headers, rows, multiline: true, style: :unicode)
+        "#{table_render(headers, rows, multiline: true, style: :unicode)}\n\n"
       else
-        job_table_individual(@data[:days_back].values.first, true)
+        "#{job_table_individual(@data[:days_back].values.first, true)}\n\n"
       end
     end
 
@@ -110,7 +107,6 @@ module SacctApi
     end
 
     def quota_table
-      puts 'Usage Quota table'
       rows = @data[:quota_filesystem].map do |fs_path, fs_info|
         [
           fs_path.to_s, fs_info.dig(:blocks, :used_bytes), fs_info.dig(:blocks, :quota_bytes),
@@ -119,7 +115,7 @@ module SacctApi
         ]
       end
 
-      table_render(QUOTA_HEADERS, rows)
+      "#{table_render(QUOTA_HEADERS, rows)}\n\n"
     end
   end
 end
