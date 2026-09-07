@@ -27,28 +27,21 @@ module SacctApi
     private
 
     def render_values
-      if valid_data?
-        puts efficiency_table
-        puts job_table
-      end
-      return if @data[:quota_filesystem].nil? || @data[:quota_filesystem] == 'None'
+      puts efficiency_table, job_table if valid_data?
+      quota = @data[:quota_filesystem] || @data['quota_filesystem']
+      return if quota.nil? || quota == 'None'
 
-      puts 'Usage Quota table'
-      puts quota_table
+      puts 'Usage Quota table', quota_table
     end
 
     def valid_data?
       days_back = @data[:days_back] || @data['days_back']
-      return false unless days_back.is_a?(Hash)
-
-      days_back.values.any? { |val| valid_entry?(val) }
+      days_back.is_a?(Hash) && days_back.values.any? { |val| valid_entry?(val) }
     end
 
     def valid_entry?(val)
-      return false if val.nil?
-      return false if val.is_a?(Hash) && (val.key?(:Error) || val.key?('Error'))
+      return false if val.nil? || (val.is_a?(Hash) && (val.key?(:Error) || val.key?('Error')))
 
-      # Cover both "none" String and :none Symbol safely
       !val.to_s.downcase.eql?('none')
     end
 
@@ -61,12 +54,8 @@ module SacctApi
     end
 
     def title(table, multiple)
-      if multiple
-        puts "#{table} table over range"
-      else
-        days = @data[:days_back].keys.first
-        puts "#{table} table for #{days} days"
-      end
+      msg = multiple ? "#{table} table over range" : "#{table} table for #{@data[:days_back].keys.first} days"
+      puts msg
     end
 
     def table_render(headers, rows, multiline: false, style: :unicode)
@@ -102,8 +91,7 @@ module SacctApi
         rows = @data[:days_back].map { |path, info| [path.to_s, job_table_individual(info, false)] }
         table_render(headers, rows, multiline: true, style: :unicode)
       else
-        fs_info = @data[:days_back].values.first
-        job_table_individual(fs_info, true)
+        job_table_individual(@data[:days_back].values.first, true)
       end
     end
 
@@ -118,8 +106,7 @@ module SacctApi
         ]
       end
 
-      style = single ? :unicode : :basic
-      table_render(SHAPE_HEADERS, rows, style: style)
+      table_render(SHAPE_HEADERS, rows, style: single ? :unicode : :basic)
     end
 
     def quota_table
