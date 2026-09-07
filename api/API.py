@@ -342,7 +342,6 @@ def time_metrics(name,access_str,last_access,days_back):
         node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command.copy(),count)
         shape = format_shapes(single,multi,node_shape)
         partitions = get_partition_list(base_command.copy())
-        0/0
     except:
        return "none"
     try:
