@@ -337,10 +337,14 @@ def time_metrics(name,access_str,last_access,days_back):
         return "none"
     count = get_count_jobs(base_command.copy())
     count = int(count) - 2 #Table header needs to go as well
-    average_time,average_queue = get_job_times(base_command.copy(),count)
-    node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command.copy(),count)
-    shape = format_shapes(single,multi,node_shape)
-    partitions = get_partition_list(base_command.copy())
+    try:
+        average_time,average_queue = get_job_times(base_command.copy(),count)
+        node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command.copy(),count)
+        shape = format_shapes(single,multi,node_shape)
+        partitions = get_partition_list(base_command.copy())
+        0/0
+    except:
+       return {"Error":"No entries in Sacct despite last submit"}
     try:
         cpueff = float(get_cpueff(base_command.copy(),count)[0]) * 100
     except:
