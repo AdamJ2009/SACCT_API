@@ -27,7 +27,8 @@ module SacctApi
     private
 
     def render_values
-      puts efficiency_table, job_table if valid_data?
+      puts efficiency_table if valid_data?
+      puts job_table if valid_data?
       quota = @data[:quota_filesystem] || @data['quota_filesystem']
       return if quota.nil? || quota == 'None'
 
