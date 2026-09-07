@@ -29,7 +29,7 @@ module SacctApi
     def render_values
       puts efficiency_table, job_table if valid_data?
       quota = @data[:quota_filesystem] || @data['quota_filesystem']
-      return if quota.nil? || quota == 'None'
+      return if quota.nil? || quota == 'none'
 
       puts 'Usage Quota table', quota_table
     end
