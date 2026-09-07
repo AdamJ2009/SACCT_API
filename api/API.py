@@ -236,7 +236,6 @@ def time_converter(value):
 def get_cpueff(base_command,count):
     base_command.pop(1)
     command = base_command + ["-P","-o","JobID,TotalCPU,Elapsed,AllocCPUS"]
-    print(command)
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
     result = result.split("|")
@@ -256,7 +255,6 @@ def get_cpueff(base_command,count):
 def get_memeff(base_command,count):
     base_command.pop(1)
     command = base_command + ["-P","-o","JobID,ReqMem,MaxRSS"]
-    print(command)
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.split("\n")
     result.pop(-1)
