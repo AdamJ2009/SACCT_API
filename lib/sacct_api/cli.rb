@@ -29,7 +29,8 @@ module SacctApi
           option :ssl, alaises: ['-s'], type: :boolean, desc: 'Verify SSL certificate'
 
           def call(**opts)
-            return Version if opts[:version]
+            return Version.new.call if opts[:version]
+
             current = ConfigManager.load
             new_url = opts[:url] || current['url']
             new_ssl = opts.key?(:ssl) ? opts[:ssl] : current['ssl']
@@ -43,7 +44,8 @@ module SacctApi
           desc 'Display current API configuration settings'
 
           def call(**opts)
-            return Version if opts[:version]
+            return Version.new.call if opts[:version]
+
             config = ConfigManager.load
             puts "Config File: #{ConfigManager::CONFIG_FILE}"
             puts "URL:         #{config['url']}"
@@ -61,7 +63,8 @@ module SacctApi
         option :json, aliases: ['-j'], type: :string, desc: 'Save json if not none'
 
         def call(**opts)
-          return Version if opts[:version]
+          return Version.new.call if opts[:version]
+
           result = api_call(opts)
 
           # This invokes SacctApi::Renderer.new(result).render
