@@ -31,7 +31,7 @@ module SacctApi
       quota = @data[:quota_filesystem] || @data['quota_filesystem']
       return if quota.nil? || quota == 'none'
 
-      puts 'Usage Quota table', quota_table
+      puts quota_table
     end
 
     def valid_data?
@@ -110,6 +110,7 @@ module SacctApi
     end
 
     def quota_table
+      puts 'Usage Quota table'
       rows = @data[:quota_filesystem].map do |fs_path, fs_info|
         [
           fs_path.to_s, fs_info.dig(:blocks, :used_bytes), fs_info.dig(:blocks, :quota_bytes),
