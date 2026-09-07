@@ -45,10 +45,11 @@ module SacctApi
     end
 
     def valid_entry?(val)
-      return false if val.nil? || val.to_s.casecmp('none').zero?
+      return false if val.nil?
       return false if val.is_a?(Hash) && (val.key?(:Error) || val.key?('Error'))
 
-      true
+      # Cover both "none" String and :none Symbol safely
+      !val.to_s.downcase.eql?('none')
     end
 
     def check_if_json_ok
