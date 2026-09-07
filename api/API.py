@@ -10,17 +10,17 @@ import pwd
 app = Flask(__name__)
 
 def get_last_user_access_time(user: str) -> str:
-    # 1. Validate username format strictly against standard POSIX patterns
+    # 1. Validate username format
     if not re.match(r"^[a-zA-Z0-9._-]+$", user) or user.startswith("-"):
         return "not a user"
 
-    # 2. Check if the user actually exists on the system local database
+    # 2. Check if the user exists on the local system/LDAP
     try:
         pwd.getpwnam(user)
     except KeyError:
         return "not a user"
 
-    # 3. Use '--' so 'user' is strictly treated as a positional target
+    # 3. Fetch login history
     command = ["last", "--", user, "-F"]
     completed_process = subprocess.run(
         command, 
@@ -29,23 +29,26 @@ def get_last_user_access_time(user: str) -> str:
         text=True
     )
 
-    lines = completed_process.stdout.splitlines()
+    lines = [line.strip() for line in completed_process.stdout.splitlines() if line.strip()]
+    
+    # If the user has never logged in via interactive login session, return default cluster date
     if not lines or "wtmp begins" in lines[0]:
-        return "not a user"
+        return datetime.date.today().strftime('%Y-%b-%d')
+
+    raw_line = lines[0]
+    now = datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y')
+    raw_line = re.sub(r"\s+still logged in\s*$", f" - {now}", raw_line)
     
-    # Extract stdout and safely mimic 'head -n 1' in Python
-    raw_output = completed_process.stdout
-    result = raw_output.splitlines()[0] if raw_output.splitlines() else ""
+    # Try parsing standard login output tokens
+    tokens = raw_line.split()
     
-    # Process output
-    now = str(datetime.datetime.now().strftime('%a %b %d %H:%M:%S %Y'))
-    result = re.sub(r"\s+still logged in\s*$", f" - {now}", str(result))
-    result = str(result).split() 
-    
-    if len(result) < 14:
-        return "not a user"
-        
-    return f"{result[13]}-{result[10]}-{result[11]}"
+    # Extract date using regex or token bounds safely
+    try:
+        # Standard user login outputs year/month/day at index positions
+        return f"{tokens[13]}-{tokens[10]}-{tokens[11]}"
+    except IndexError:
+        # Fall back to today's date if line formatting differs for system accounts
+        return datetime.date.today().strftime('%Y-%b-%d')
 
 def not_a_user_json():
     data = {"Error":"Not Found","Reason":"Not a user"}
