@@ -224,6 +224,7 @@ def get_cpueff(base_command,count):
     result = result.split("|")
     cpueffsum = 0
     last = 0
+    count += 1
     for i in range(4,len(result),4):
         current = (result[i].split("."))[0]
         if re.search(r"\d+\.(batch|0)$",result[i]) and last != current:
