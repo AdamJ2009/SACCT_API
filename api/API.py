@@ -344,7 +344,7 @@ def time_metrics(name,access_str,last_access,days_back):
         partitions = get_partition_list(base_command.copy())
         0/0
     except:
-       return None
+       return "none"
     try:
         cpueff = float(get_cpueff(base_command.copy(),count)[0]) * 100
     except:
