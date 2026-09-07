@@ -5,20 +5,33 @@ import datetime
 import re
 import os
 import sys
+import pwd
 
 app = Flask(__name__)
 
 def get_last_user_access_time(user: str) -> str:
-    # Pass arguments safely as a list with shell=False
-    command = ["last", user, "-F"]
-    
-    # Run the command safely without shell execution
+    # 1. Validate username format strictly against standard POSIX patterns
+    if not re.match(r"^[a-zA-Z0-9._-]+$", user) or user.startswith("-"):
+        return "not a user"
+
+    # 2. Check if the user actually exists on the system local database
+    try:
+        pwd.getpwnam(user)
+    except KeyError:
+        return "not a user"
+
+    # 3. Use '--' so 'user' is strictly treated as a positional target
+    command = ["last", "--", user, "-F"]
     completed_process = subprocess.run(
         command, 
         capture_output=True, 
         shell=False, 
         text=True
     )
+
+    lines = completed_process.stdout.splitlines()
+    if not lines or "wtmp begins" in lines[0]:
+        return "not a user"
     
     # Extract stdout and safely mimic 'head -n 1' in Python
     raw_output = completed_process.stdout
@@ -218,6 +231,7 @@ def time_converter(value):
     return int(delta.total_seconds()*1000 + ms) #doesn't matter the time as long as its the same
 
 def get_cpueff(base_command,count):
+    base_command.pop(1)
     command = base_command + ["-P","-o","JobID,TotalCPU,Elapsed,AllocCPUS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.replace("\n","|")
@@ -236,6 +250,7 @@ def get_cpueff(base_command,count):
     return cpueffsum/count, #Will only fail if all metrics fail
 
 def get_memeff(base_command,count):
+    base_command.pop(1)
     command = base_command + ["-P","-o","JobID,ReqMem,MaxRSS"]
     result = subprocess.run(command, capture_output=True, text=True, shell=False).stdout
     result = result.split("\n")
@@ -312,21 +327,21 @@ def time_metrics(name,access_str,last_access,days_back):
         "-S", start_date,
         "-E", access_str
     ]
-    submit_time = get_time_submit(base_command)
+    submit_time = get_time_submit(base_command.copy())
     if submit_time == "Nothing in last 90 days":
         return "none"
-    count = get_count_jobs(base_command)
+    count = get_count_jobs(base_command.copy())
     count = int(count) - 2 #Table header needs to go as well
-    average_time,average_queue = get_job_times(base_command,count)
-    node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command,count)
+    average_time,average_queue = get_job_times(base_command.copy(),count)
+    node,cpu,tasks,nodelist,shapelist,single,multi,node_shape = get_shape(base_command.copy(),count)
     shape = format_shapes(single,multi,node_shape)
-    partitions = get_partition_list(base_command)
+    partitions = get_partition_list(base_command.copy())
     try:
-        cpueff = float(get_cpueff(base_command,count)[0]) * 100
+        cpueff = float(get_cpueff(base_command.copy(),count)[0]) * 100
     except:
         cpueff= "Missing"
     try:
-        memeff = float(get_memeff(base_command,count)[0]) * 100
+        memeff = float(get_memeff(base_command.copy(),count)[0]) * 100
     except:
         memeff = "Missing"
     data = {
@@ -380,7 +395,7 @@ def get_user_metrics_days(name: str, time:int):
             "-S", start_date,
             "-E", access_str
         ]
-        submit_time = get_time_submit(base_command)
+        submit_time = get_time_submit(base_command.copy())
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str,time)
         data = { "user":name,
@@ -422,7 +437,7 @@ def get_user_metrics(name: str):
             "-S", start_date,
             "-E", access_str
         ]
-        submit_time = get_time_submit(base_command)
+        submit_time = get_time_submit(base_command.copy())
         if submit_time == "Nothing in last 90 days":
             return no_data_json(name,access_str)
         data = { "user":name,
