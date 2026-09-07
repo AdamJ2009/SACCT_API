@@ -27,24 +27,35 @@ module SacctApi
     private
 
     def render_values
-      days_back = @data[:days_back] || @data["days_back"]
-
-      unless days_back.is_a?(Hash) && days_back.values.any? { |val| val.is_a?(Hash) && (val.key?(:Error) || val.key?("Error")) }
+      if valid_data?
         puts efficiency_table
-        puts "\n"
         puts job_table
-        puts "\n"
       end
+      return if @data[:quota_filesystem].nil? || @data[:quota_filesystem] == 'None'
 
-      return if @data[:quota_filesystem].nil? || @data[:quota_filesystem] == "None"
       puts 'Usage Quota table'
       puts quota_table
+    end
+
+    def valid_data?
+      days_back = @data[:days_back] || @data['days_back']
+      return false unless days_back.is_a?(Hash)
+
+      days_back.values.any? { |val| valid_entry?(val) }
+    end
+
+    def valid_entry?(val)
+      return false if val.nil? || val.to_s.casecmp('none').zero?
+      return false if val.is_a?(Hash) && (val.key?(:Error) || val.key?('Error'))
+
+      true
     end
 
     def check_if_json_ok
       return 1 if @data.nil?
       return 2 if @data.key?(:Error)
       return 3 if @data.dig(:last, :submit) =~ /^Not within \d+ days$/
+
       0
     end
 
@@ -64,6 +75,7 @@ module SacctApi
       border_opts = multiline ? { separator: :each_row } : {}
 
       table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
+      puts "\n"
     end
 
     def efficiency_table

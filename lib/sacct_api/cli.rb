@@ -109,7 +109,6 @@ module SacctApi
           URI.parse("#{url}/user/#{user}/#{days}")
         end
 
-
         def url_validate
           config = ConfigManager.load
           if config['ssl']

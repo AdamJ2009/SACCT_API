@@ -3,6 +3,8 @@ PATH
   specs:
     sacct_api (1.0.0)
       dry-cli (~> 1.0)
+      net-http (~> 0.4)
+      openssl (~> 3.2)
 
 GEM
   remote: https://rubygems.org/
@@ -18,6 +20,9 @@ GEM
     language_server-protocol (3.17.0.6)
     lint_roller (1.1.0)
     method_source (1.1.0)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
+    openssl (3.3.3)
     parallel (2.1.0)
     parser (3.3.12.0)
       ast (~> 2.4.1)
@@ -84,6 +89,7 @@ GEM
       tty-screen (~> 0.8)
     unicode-display_width (2.6.0)
     unicode_utils (1.4.0)
+    uri (1.1.1)
     wisper (2.0.1)
 
 PLATFORMS
@@ -94,6 +100,8 @@ DEPENDENCIES
   csv
   dotenv (~> 3.1)
   dry-cli (~> 1.0)
+  net-http
+  openssl
   pry (~> 0.14)
   rake (~> 13.2)
   rspec (~> 3.13)
@@ -114,6 +122,8 @@ CHECKSUMS
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   method_source (1.1.0) sha256=181301c9c45b731b4769bc81e8860e72f9161ad7d66dd99103c9ab84f560f5c5
+  net-http (0.9.1) sha256=25ba0b67c63e89df626ed8fac771d0ad24ad151a858af2cc8e6a716ca4336996
+  openssl (3.3.3) sha256=d46902138f2987c13122fab826030a11c2bb9b8a16394215cbfc5062c5e2d335
   parallel (2.1.0) sha256=b35258865c2e31134c5ecb708beaaf6772adf9d5efae28e93e99260877b09356
   parser (3.3.12.0) sha256=21a6d7f755d5a24dfbdc6e6b772e4e879a52e7631a88bc5a3a134606052c9828
   pastel (0.8.0) sha256=481da9fb7d2f6e6b1a08faf11fa10363172dc40fd47848f096ae21209f805a75
@@ -143,6 +153,7 @@ CHECKSUMS
   tty-table (0.12.0) sha256=fdc27a4750835c1a16efe19a0b857e3ced3652cc7aceafe6dca94908965b9939
   unicode-display_width (2.6.0) sha256=12279874bba6d5e4d2728cef814b19197dbb10d7a7837a869bab65da943b7f5a
   unicode_utils (1.4.0) sha256=b922d0cf2313b6b7136ada6645ce7154ffc86418ca07d53b058efe9eb72f2a40
+  uri (1.1.1) sha256=379fa58d27ffb1387eaada68c749d1426738bd0f654d812fcc07e7568f5c57c6
   wisper (2.0.1) sha256=ce17bc5c3a166f241a2e6613848b025c8146fce2defba505920c1d1f3f88fae6
 
 RUBY VERSION
