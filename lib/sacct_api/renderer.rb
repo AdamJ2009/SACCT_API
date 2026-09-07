@@ -64,7 +64,7 @@ module SacctApi
       table = TTY::Table.new(header: headers, rows: rows)
       border_opts = multiline ? { separator: :each_row } : {}
 
-      table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
+      puts table.render(style, multiline: multiline, border: border_opts, padding: [0, 1, 0, 0])
       puts "\n"
     end
 
