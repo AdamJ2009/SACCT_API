@@ -300,7 +300,7 @@ def diskquota(user):
             completed = subprocess.run(command, capture_output=True, text=True)
         stdout = completed.stdout.strip()
         if not stdout or completed.returncode != 0:
-            return {}
+            return None
         lines = [' '.join(line.split()) for line in stdout.splitlines() if line.strip()]
         quotanet = {}
         for line in lines[2:]:
@@ -321,7 +321,7 @@ def diskquota(user):
             }
         return quotanet
     except Exception:
-        return {}
+        return None
 
 def time_metrics(name,access_str,last_access,days_back):
     start_date = (last_access - datetime.timedelta(days=days_back)).strftime('%Y-%m-%d')
@@ -344,7 +344,7 @@ def time_metrics(name,access_str,last_access,days_back):
         partitions = get_partition_list(base_command.copy())
         0/0
     except:
-       return {"Error":"No entries in Sacct despite last submit"}
+       return None
     try:
         cpueff = float(get_cpueff(base_command.copy(),count)[0]) * 100
     except:

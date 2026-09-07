@@ -27,15 +27,16 @@ module SacctApi
     private
 
     def render_values
-      if @data.key?(:days_back)
+      days_back = @data[:days_back] || @data["days_back"]
+
+      unless days_back.is_a?(Hash) && days_back.values.any? { |val| val.is_a?(Hash) && (val.key?(:Error) || val.key?("Error")) }
         puts efficiency_table
         puts "\n"
         puts job_table
         puts "\n"
       end
 
-      return unless @data.key?(:quota_filesystem)
-
+      return if @data[:quota_filesystem].nil? || @data[:quota_filesystem] == "None"
       puts 'Usage Quota table'
       puts quota_table
     end
@@ -44,7 +45,6 @@ module SacctApi
       return 1 if @data.nil?
       return 2 if @data.key?(:Error)
       return 3 if @data.dig(:last, :submit) =~ /^Not within \d+ days$/
-
       0
     end
 
