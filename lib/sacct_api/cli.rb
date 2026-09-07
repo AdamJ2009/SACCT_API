@@ -23,6 +23,7 @@ module SacctApi
       # Update the config file for url changes
       module Config
         # Sets config values
+        desc 'API config manager, use jobrep config --help for more info'
         class Set < Dry::CLI::Command
           desc 'Save API configuration settings'
           option :url, aliases: ['-u'], type: :string, desc: 'API base URL'
